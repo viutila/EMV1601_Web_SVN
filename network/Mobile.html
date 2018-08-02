@@ -1,0 +1,254 @@
+﻿<!DOCTYPE html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Pragma" content="no-store, no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="cache-control" content="no-store, no-cache, must-revalidate">
+<link rel="stylesheet" type="text/css" href="../include/css/style.css">
+<script type="text/javascript" src="../include/js/utility.js"></script>
+<script type="text/javascript" src="../include/js/AjaxClass.js"></script>
+<script type="text/javascript" src="../include/js/HandleXml.js"></script>
+<script type="text/javascript">
+var hl = parent.hl;
+var ajax = new AjaxClass();
+var hx = new HandleXml();
+var setHx = new HandleXml();
+var callScreenModeFlag = 0;
+var changePassFlag = 0;
+
+function init(){
+	setLanguage();
+	setHx.setUrl("../" + parent.g_device_xml_name);
+	GetXML();
+	initFunc();
+	chgGPRSsel();
+}
+
+function initFunc() {
+    var funcNum = 0;
+    var Cnt = 0;
+    var i = 0;
+    var str = "Mobile";
+    EFDEF_("^td_").className("txtLeft");
+
+    funcNum = setHx.getNodeChildSize("MOBILE");
+    for (Cnt = 0; Cnt < funcNum; Cnt++) {
+
+        switch (setHx.getNodeChildName("MOBILE", Cnt)) {
+            case "GPRSService":
+                setIdDisplay("td_GPRSService", "table-cell");
+                setIdDisplay("sel_GPRSService01", "inline");
+                setIdDisplay("sel_GPRSService02", "inline");
+                var hs = new HandleSelect("sel_GPRSService01", 0);
+                var stamp = parent.SetHx.getNodeValue("NetworkSetting", "GPRS_SERVICE_SWITCH").split(",");
+                for (i = 0; i < stamp.length; i++) {
+                    hs.addOpt(i, stamp[i], stamp[i].toLowerCase());
+                }
+                var hs1 = new HandleSelect("sel_GPRSService02", 0);
+                var stamp1 = parent.SetHx.getNodeValue("NetworkSetting", "GPRS_SERVICE").split(",");
+                for (i = 0; i < stamp1.length; i++) {
+                    hs1.addOpt(i, stamp1[i], stamp1[i].toLowerCase());
+                }
+                setIdValue("sel_GPRSService01", hx.getNodeValue(str, "enable"));
+                setIdValue("sel_GPRSService02", hx.getNodeValue(str, "zone"));
+                break;
+            case "APN":
+                setIdDisplay("td_APN", "table-cell");
+                setIdDisplay("txt_APN", "inline");
+                setIdValue("txt_APN", hx.getNodeValue(str, "APN"));
+                break;
+            case "PhoneNumber":
+                setIdDisplay("td_Phone_Number", "table-cell");
+                setIdDisplay("txt_Phone_Number", "inline");
+                setIdValue("txt_Phone_Number", hx.getNodeValue(str, "phonenumber"));
+                break;
+            case "UserName":
+                setIdDisplay("td_User_Name", "table-cell");
+                setIdDisplay("txt_User_Name", "inline");
+                setIdValue("txt_User_Name", hx.getNodeValue(str, "username"));
+                break;
+            case "Password":
+            	setIdDisplay("td_Password", "table-cell");
+                setIdDisplay("txt_Password", "inline");
+                setIdValue("txt_Password", hx.getNodeValue(str, "password"));
+                setIdInnerHTML("td_Password", hl.get("PASSWORD"));
+                break;
+            case "IP":
+                setIdDisplay("td_IP", "table-cell");
+                setIdDisplay("td_IP_val", "inline");
+                setIdInnerHTML("td_IP_val", hx.getNodeValue(str, "DynamicIPAddress"));
+                break;
+            case "SubnetMask":
+                setIdDisplay("td_SubnetMask", "table-cell");
+                setIdDisplay("td_SubnetMask_val", "table-cell");
+                setIdInnerHTML("td_SubnetMask_val", hx.getNodeValue(str, "DynamicSubnetMask"));
+                break;
+            case "Gateway":
+                setIdDisplay("td_Gateway", "table-cell");
+                setIdDisplay("td_Gateway_val", "table-cell");
+                setIdInnerHTML("td_Gateway_val", hx.getNodeValue(str, "DynamicGateway"));
+                break;
+            case "DDNS1":
+                setIdDisplay("td_DDNS1", "table-cell");
+                setIdDisplay("td_DDNS1_val", "table-cell");
+                setIdInnerHTML("td_DDNS1_val", hx.getNodeValue(str, "DynamicPrimaryDNS"));
+                break;
+            case "DDNS2":
+                setIdDisplay("td_DDNS2", "table-cell");
+                setIdDisplay("td_DDNS2_val", "table-cell");
+                setIdInnerHTML("td_DDNS2_val", hx.getNodeValue(str, "DynamicSecondaryDNS"));
+                break;
+            case "#text":   //******* for chrome
+                funcNum++;
+                break;
+        }
+    }
+}
+function chgGPRSsel(){
+	if(getIdValue("sel_GPRSService01") == "off"){
+		//setIdDisplay("tbl_01", "none");
+		setIdVisibility("tbl_01",0);
+	}else if(getIdValue("sel_GPRSService01") == "on"){
+		//setIdDisplay("tbl_01", "table-cell");
+		setIdVisibility("tbl_01",1);
+	}
+}
+function GetXML(){
+    hx.setUrl("../cgi-bin/NetworkMobile3G.xml");
+}
+function SetXML(){
+	var hx2 = new HandleXml();
+	var str = "Mobile";
+	var funcNum = 0;
+	var Cnt = 0;
+	var i = 0;
+	EFDEF_("^td_").className("txtLeft");
+
+	funcNum = setHx.getNodeChildSize("MOBILE");
+	for (Cnt = 0; Cnt < funcNum; Cnt++) {
+	    switch (setHx.getNodeChildName("MOBILE", Cnt)) {
+	        case "GPRSService":
+				hx.setNodeValue(getIdValue("sel_GPRSService01"), str, "enable");
+				hx.setNodeValue(getIdValue("sel_GPRSService02"), str, "zone");
+                break;
+            case "APN":
+            	hx.setNodeValue(getIdValue("txt_APN"), str, "APN");
+                break;
+            case "PhoneNumber":
+            	hx.setNodeValue(getIdValue("txt_Phone_Number"), str, "phonenumber");
+                break;
+            case "UserName":
+            	hx.setNodeValue(getIdValue("txt_User_Name"), str, "username");
+                break;
+            case "Password":
+				hx.setNodeValue(getIdValue("txt_Password"), str, "password");
+                break;
+            case "IP":
+
+                break;
+            case "SubnetMask":
+
+                break;
+            case "Gateway":
+
+                break;
+            case "DDNS1":
+
+                break;
+            case "DDNS2":
+
+                break;
+	        case "#text":   //******* for chrome
+	            funcNum++;
+	            break;
+	    }
+	}
+
+	//var newxml = hx.getXml().xml.replace(/\t/g, "");
+	var newxml;
+	if (window.ActiveXObject) {
+	    newxml = hx.getXml().xml.replace(/\t/g, "");
+	}
+	else {
+	    newxml = (new XMLSerializer()).serializeToString(hx.getXml()).replace(/\t/g, "");
+	}
+	ajax.postData("../cgi-bin/NetworkMobile3G.xml", newxml);
+	hx2.setXml(ajax.data);
+	if(hx2.getNodeValue("result") == "1"){
+		alert(hl.get("SUCCESS"));
+	}else{
+		alert(hl.get("FAIL"));
+	}
+	parent.showMsg(hx.getXml().xml,"xml");
+}
+function setLanguage(){
+	EFDEF_("^td_").className("txtLeft");
+	setIdValue("btn_Save", hl.get("SAVE"));
+}
+</script>
+</head>
+<body onload="init();">
+	<div class="ClientFrame">
+            <table border="0" cellspacing="5" cellpadding="0">
+			<tr>
+				<td id="td_GPRSService" style="width:200px; display: none;">GPRS Service</td>
+				<td>
+					<select id="sel_GPRSService01" style="display: none;" onchange="chgGPRSsel()"></select>
+					<select id="sel_GPRSService02" style="display: none;"></select>
+				</td>
+			</tr>
+			</table>
+			<table id="tbl_01" border="0" cellspacing="5" cellpadding="0">
+			<tr>
+				<td id="td_APN" style="width:200px; display: none;">APN</td>
+				<td>
+					<input type="text" id="txt_APN" maxlength="32" style="display: none;" onblur="CheckUnicodeTitle(this);"/>
+				</td>
+			</tr>
+			<tr>
+				<td id="td_Phone_Number" style="display: none;">Phone Number</td>
+				<td>
+					<input type="text" id="txt_Phone_Number" maxlength="32" style="display: none;" onblur="CheckUnicodeTitleforMobilePhoneNumber(this);"/>
+				</td>
+			</tr>
+			<tr>
+				<td id="td_User_Name" style="display: none;">User Name</td>
+				<td>
+					<input type="text" id="txt_User_Name" maxlength="32" style="display: none;" onblur="CheckUnicodeTitle(this);"/>
+				</td>
+			</tr>
+			<tr>
+				<td id="td_Password" style="display: none;">Password</td>
+				<td>
+					<input type="password" id="txt_Password" maxlength="32" style="width:300px; display: none;" onblur="CheckTitle(this);"/>
+				</td>
+			</tr>
+			</table>
+			<table border="0" cellspacing="5" cellpadding="0">
+			<tr>
+				<td id="td_IP" style="width:200px; display: none;">IP</td>
+				<td id="td_IP_val" width="200" class="txtLeft" style="display:none;"></td>
+			</tr>
+			<tr>
+				<td id="td_SubnetMask" style="display: none;">Subnet Mask</td>
+				<td id="td_SubnetMask_val" width="200" class="txtLeft" style="display:none;"></td>
+			</tr>
+			<tr>
+				<td id="td_Gateway" style="display: none;">Gateway</td>
+				<td id="td_Gateway_val" width="200" class="txtLeft" style="display:none;"></td>
+			</tr>
+			<tr>
+				<td id="td_DDNS1" style="display: none;">DNS Server 1</td>
+				<td id="td_DDNS1_val" width="200" class="txtLeft" style="display:none;"></td>
+			</tr>
+			<tr>
+				<td id="td_DDNS2" style="display: none;">DNS Server 2</td>
+				<td id="td_DDNS2_val" width="200" class="txtLeft" style="display:none;"></td>
+			</tr>
+		    </table>
+	</div>
+	<div class="applyFrm">
+		<input type="button" id="btn_Save" class="btnStyle" value="" style="width:120px;" onclick="SetXML();"/>
+	</div>
+</body>
+</html>

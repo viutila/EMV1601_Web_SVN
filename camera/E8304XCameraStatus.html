@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../include/css/style.css">
+<link rel="stylesheet" type="text/css" href="../include/css/ScreenMask.css">
+<link rel="stylesheet" type="text/css" href="../include/css/MultipleCheckbox.css">
+<script type="text/javascript" src="../include/js/utility.js"></script>
+<script type="text/javascript" src="../include/js/AjaxClass.js"></script>
+<script type="text/javascript" src="../include/js/HandleXml.js"></script>
+<script type="text/javascript" src="../include/js/cgi.js"></script>
+<script type="text/javascript" src="../include/js/ScreenMask.js"></script>
+<script type="text/javascript">
+<!--
+var hl = parent.hl;
+var ajax = new AjaxClass();
+var hx = new HandleXml();
+var listHx = new HandleXml();
+var sm;
+var mc_apply;
+var modify_id;
+var cgi = new cgi();
+var timeFlag;
+
+function init() {
+   
+    GetXML();
+    initTable();
+    setLanguage();
+}
+
+function refreshTable() {
+    timeFlag=setTimeout(function(){
+        GetXML();
+        initTable();},15000);
+}
+function GetXML() {
+    //listHx.setUrl("../xml/ENVR8304XIPCamList.xml");
+    listHx.setUrl("../cgi-bin/ENVR8304XIPCamList.xml");
+    ////hx.setUrl("../cgi-bin/IPCam.xml");
+
+}
+function initTable() {
+
+    var ht = new HandleTable("tbl_list");
+    ht.clear();
+    var str = "";
+    //var name, rate, voltage, recordstatus, connectstatus, bitrate, bitrate;
+    var name, ipAddress, port, frameRate, recStatus, connectStatus;
+    var dataCnt = 0;
+    var recStr, connStr;
+    for (var cnt = 1; cnt <= parent.g_ipcam_num; cnt++) {
+        str = "camera" + cnt;
+
+
+        //list style
+        ht.insertRow().id("tbl_tr_" + cnt).onmouseover(
+					function () {
+					    setIdBgColor(this, "#F5FFFA");
+					})
+				.onmouseout(
+					function () {
+					    var id = this.id.split("_")[2];
+                        if(id % 2)
+                            setIdBgColor(this, "#CCCCCC");
+                        else
+                            setIdBgColor(this, "");
+					});
+        if (cnt % 2)
+            setIdBgColor("tbl_tr_" + cnt, "#CCCCCC");
+
+
+        //getXml data
+        name = listHx.getNodeValue(str, "model");
+        ipAddress = listHx.getNodeValue(str, "ipAddress");
+        port = listHx.getNodeValue(str, "httpPort");
+        frameRate = listHx.getNodeValue(str, "normalSpeed");
+        recStatus = listHx.getNodeValue(str, "recordStatus");
+        connectStatus = listHx.getNodeValue(str, "connectStatus");
+
+
+
+        
+
+
+        //***********************************************************************************************
+        if (parseInt(recStatus) == 1)
+            recStr = hl.get("RECORDING"); //multi-lang
+        else if (parseInt(recStatus) == 0)
+            recStr = hl.get("NO_RECORDING");
+        else {
+            recStr = hl.get("DISCONNECT");
+            name = "---";
+            ipAddress = "---";
+            port = "---";
+            frameRate = "---";
+            recStatus
+            connectStatus = "----------";
+        }
+        
+        //***********************************************************************************************
+
+        if (parseInt(connectStatus) == 0)//0
+        {
+            connStr = hl.get("DISCONNECT");
+        } 
+        else if (parseInt(connectStatus) == 1) {
+            connStr = hl.get("CONNECT");
+        } else {
+            connStr = "Need Authorization";
+        }
+        
+
+        ht.insertCell().fontSize("16px").textAlign("center")
+					.width(90)
+					.innerHTML("CH" + cnt.toFill(2));
+        ht.insertCell().id("td_camera_name_" + cnt).fontSize("16px").textAlign("center")
+					.width(90)
+					.innerHTML(name);
+        ht.insertCell().id("td_camera_ip_address_" + cnt).fontSize("16px").textAlign("center")
+					.width(210)
+					.innerHTML(ipAddress);
+        ht.insertCell().id("td_camera_port_" + cnt).fontSize("16px").textAlign("center")
+					.width(70)
+					.innerHTML(port);       
+        ht.insertCell().id("td_camera_frame_rate_" + cnt).fontSize("16px").textAlign("center")
+					.width(160)
+					.innerHTML(frameRate + " fps");
+        ht.insertCell().id("td_camera_rec_status_" + cnt).fontSize("16px").textAlign("center")
+					.width(160)
+					.innerHTML(recStr);
+        ht.insertCell().id("td_camera_connect_status_" + cnt).fontSize("16px").textAlign("center")
+					.width(160)
+					.innerHTML(connStr);
+    
+    }
+
+    refreshTable();
+}
+
+function setLanguage() {
+    var cnt;
+    var lenght;
+    var str;
+
+
+    setIdInnerHTML("td_Camera_List", hl.get("CAMERA_LIST"));
+   
+    setIdInnerHTML("td_list_channel", hl.get("CHANNEL"));
+    setIdInnerHTML("td_list_name", hl.get("NAME"));
+
+    setIdInnerHTML("td_list_ip_address", "IP Address");
+    setIdInnerHTML("td_list_port", "Port");
+    setIdInnerHTML("td_list_frame_rate", hl.get("FRAME_RATE"));
+    setIdInnerHTML("td_list_rec_status", hl.get("RECORD")); //multi-lang
+    setIdInnerHTML("td_list_connect_status", "Connect Status");
+
+
+}
+
+
+
+//-->
+</script>
+</head>
+<body onload="init();" >
+	<div class="ClientFrame">
+    <div id="div_list">
+    <table>
+    <tr><td id="td_Camera_List" style="font-size:26px; height:40px;color: #65A097;" align="left">Camera List</td></tr>
+    <tr>
+        <td>
+            <div>
+                <table>
+                    <tr>
+                        <td id="td_list_channel" style="font-size:20px;width:90px;color: #65A097">Channel</td>
+                        <td id="td_list_name" style="font-size:20px;width:90px;color: #65A097">Name</td>
+                        <td id="td_list_ip_address" style="font-size:20px;width:210px;color: #65A097">IP Address</td>
+                        <td id="td_list_port" style="font-size:20px;width:70px;color: #65A097">port</td>
+                        <td id="td_list_frame_rate" style="font-size:20px;width:160px;color: #65A097">Frame Rate</td>           
+                        <td id="td_list_rec_status" style="font-size:20px;width:160px;color: #65A097">REC Status</td>
+                        <td id="td_list_connect_status" style="font-size:20px;width:160px;color: #65A097">Connect Status</td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div style="width:1000px; height:600px; overflow:auto;">
+            <table id="tbl_list"> 
+            </table>
+            </div>
+        </td>
+    </tr>
+    </table>  
+    </div> 
+    </div>
+    
+    <div id="mask" style="position:absolute;height:770px;width:1220px; z-index:99;  background-color:#FFFFFF; filter:alpha(opacity=50);-moz-opacity:0.5;display:none;"></div>
+	<div id="mc_apply"></div>
+</body>
+</html>

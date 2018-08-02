@@ -1,0 +1,1882 @@
+﻿<!DOCTYPE html />
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="-1">
+<meta http-equiv="cache-control" content="no-store">
+<link rel="stylesheet" type="text/css" href="../include/css/style.css"/>
+<link rel="stylesheet" type="text/css" href="../include/css/ScreenMask.css"/>
+<link rel="stylesheet" type="text/css" href="../include/css/MultipleCheckbox.css"/>
+<link rel="stylesheet" href="../include/css/jquery-ui.css" />
+<script type="text/javascript" src="../include/js/utility.js"></script>
+<script type="text/javascript" src="../include/js/AjaxClass.js"></script>
+<script type="text/javascript" src="../include/js/HandleXml.js"></script>
+<script type="text/javascript" src="../include/js/Slide.js"></script>
+<script type="text/javascript" src="../include/js/ScreenMask.js"></script>
+<script type="text/javascript" src="../include/js/MultipleCheckbox.js"></script>
+<style>
+    .ui-widget-content .ui-state-default 
+    {
+        border: 1px solid #d3d3d3/*{borderColorDefault}*/;
+	    background: #797979/*{bgColorDefault}*/ /*url(images/ui-bg_glass_75_e6e6e6_1x400.png)*//*{bgImgUrlDefault}*/ 40%/*{bgDefaultXPos}*/ 40%/*{bgDefaultYPos}*/ repeat-x/*{bgDefaultRepeat}*/;
+	    font-weight: normal/*{fwDefault}*/;
+	    color: #555555/*{fcDefault}*/;
+    }
+    #slider1 .ui-slider-range { background: #FFD700; }
+    #slider2 .ui-slider-range { background: #FFD700; }
+    #slider3 .ui-slider-range { background: #FFD700; }
+    #slider4 .ui-slider-range { background: #FFD700; }
+</style>
+<script type="text/javascript">
+var hl = parent.hl;
+var ajax = new AjaxClass();
+var ajax2 = new AjaxClass();
+var hx = new HandleXml();
+var statusHx = new HandleXml();
+var setHx = new HandleXml();
+var devicehx = new HandleXml();
+var hybridHx = new HandleXml();
+var sm;
+var mc_apply;
+var g_cam_ary = new Array();
+var HallWay_Device_Ary = new Array();
+
+var cameraProfileHx = new HandleXml();
+var colorOptionHx = new HandleXml();
+
+
+var arrayDayModeUIOption;
+var arrayDayModeCGIOption;
+var arrayDayAEModeUIOption;
+var arrayDayAEModeCGIOption;
+var arrayDayAEShutterUIOption;
+var arrayDayAEShutterCGIOption;
+var arrayDayAEFlickUIOption;
+var arrayDayAEFlickCGIOption;
+
+var arrayNightModeUIOption;
+var arrayNightModeCGIOption;
+var arrayNightAEModeUIOption;
+var arrayNightAEModeCGIOption;
+var arrayNightAEShutterUIOption;
+var arrayNightAEShutterCGIOption;
+var arrayNightAEFlickUIOption;
+var arrayNightAEFlickCGIOption;
+
+function setObjDisabled(){
+	var args = arguments;
+	setIdDisabled("tr_channel", args[0]);
+	setIdDisabled("chk_connected_channel", args[0]);
+	setIdDisabled("chk_mask_channel", args[0]);
+
+	setIdDisabled("tr_ratio", args[1]);
+	setIdDisabled("sel_ratio", args[1]);
+	setIdDisabled("tr_Hallway", args[2]);
+
+    setIdDisabled("tr_profileSetting", args[3]);
+    setIdDisabled("sel_profileSetting", args[3]);
+
+    setIdDisabled("tr_profileMode", args[4]);
+    setIdDisabled("sel_profileMode", args[4]);
+
+    setIdDisabled("tr_profileFlicker", args[5]);
+    setIdDisabled("chk_profileFlicker", args[5]);
+
+    setIdDisabled("tr_exposureSetting", args[6]);
+    
+    setIdDisabled("trDecieTitle", args[7]);
+    setIdDisabled("trRecordDual", args[8]);
+    setIdDisabled("sel_record_dual_stream", args[8]);
+    setIdDisabled("trRecordMode", args[9]);
+    setIdDisabled("sel_record_mode", args[9]);
+}
+
+function init() {
+    //alert("++++");
+    setIdDisplay("btn_Apply_To", "none");
+
+    GetHybridXML();
+
+    var type = hybridHx.getNodeValue("Camera1","type");
+    //alert("type = " + type);
+
+    GetStatusXML();
+    
+    GetDeviceXML();
+
+    //alert("----");
+    initFunc();
+    //alert("0000");
+    CreateSlideBar();
+    //alert("5555");
+    initHallwayImage();
+    //alert("6666");
+
+    if (type == "Analog") {
+        setObjDisabled(true, true, true, true, true, true, true, false, true, true);
+
+
+        setIdDisabled("txt4", true);
+        setIdDisplay("slider4", "none");
+        
+        setIdDisplay("txt4", "none");
+        setIdDisplay("td_Sharpness", "none");
+        
+        
+
+        setIdDisabled("txt1", false);
+        setIdDisplay("slider1", "block");
+
+        setIdDisabled("txt2", false);
+        setIdDisplay("slider2", "block");
+
+        setIdDisabled("txt3", false);
+        setIdDisplay("slider3", "block");
+
+
+        var str = "Camera" + getIdSelectText("sel_channel_num");
+
+        setIdValue("txt1", hybridHx.getNodeValue(str, "Analog", "brightnessLevel"));
+        $("#slider1").slider("option", "value", hybridHx.getNodeValue(str, "Analog", "brightnessLevel"));
+
+        setIdValue("txt2", hybridHx.getNodeValue(str, "Analog", "contrastLevel"));
+        $("#slider2").slider("option", "value", hybridHx.getNodeValue(str, "Analog", "contrastLevel"));
+
+        setIdValue("txt3", hybridHx.getNodeValue(str, "Analog", "saturationLevel"));
+        $("#slider3").slider("option", "value", hybridHx.getNodeValue(str, "Analog", "saturationLevel"));
+
+		setIdValue("txt_device_title",hybridHx.getNodeValue(str, "Analog", "title"));
+		setIdValue("sel_record_dual_stream",hybridHx.getNodeValue(str, "Analog", "recordDual"));
+		setIdValue("sel_record_mode",hybridHx.getNodeValue(str, "Analog", "recordMode"));
+		selectCamera();
+        
+    } else if (type == "IPCam") {
+
+        GetXML();
+        AESetting();
+        //alert("1111");
+        colorOption();
+        //alert("2222");
+
+        //alert("3333");
+        setIdDisabled("txt4", false);
+        setIdDisplay("slider4", "block");
+        
+        setIdDisplay("txt4", "block");
+        setIdDisplay("td_Sharpness", "block");
+
+        sm = new ScreenMask("m", "sm");
+        mc_apply = new MultipleCheckbox("d", "mc_apply", hl.get("CAMERA"), 300, 500, hl);
+        for (var i = 0; i < parent.g_total_ch_num; i++) {
+            g_cam_ary.push(i + 1);
+        }
+        //alert("4444");
+        
+
+        //ChangeMotionSel();
+        selectCamera();
+    } else {
+        setObjDisabled(true, true, true, true, true, true, true, true, true, true);
+
+
+        setIdDisabled("txt4", true);
+        setIdDisplay("slider4", "none");
+        setIdDisplay("txt4", "block");
+        setIdDisplay("td_Sharpness", "block");
+
+        setIdDisabled("txt1", true);
+        setIdDisplay("slider1", "none");
+
+        setIdDisabled("txt2", true);
+        setIdDisplay("slider2", "none");
+
+        setIdDisabled("txt3", true);
+        setIdDisplay("slider3", "none");
+
+    }
+
+   
+    
+    if (parent.firstTimeFlag == 0) {
+        parent.firstTimeFlag = 1;
+        parent.openLiveStreamApplet();
+    }
+    //parent.SetAppletVideoAdjust(0);
+    parent.ChangAppletPosition(480, 360, 220, 330);
+    refresh();
+}
+
+function GetHybridXML() {
+    hybridHx.setUrl("../cgi-bin/HybridCamera.xml");
+    setHx.setUrl("../" + parent.g_device_xml_name);//hx.getNodeValue("camera1", "ipAddress") // 192.168.33.73
+}
+
+function colorOption(){
+    if (parseInt(colorOptionHx.getNodeValue("Brightness", "enable")) == "1") {
+        setIdDisabled("txt1", false);
+        //setIdDisabled("slider1", false);
+        setIdDisplay("slider1", "block");
+    } else {
+        setIdDisabled("txt1", true);
+        //setIdDisabled("slider1", true);
+        setIdDisplay("slider1", "none");
+    }
+    
+    if (parseInt(colorOptionHx.getNodeValue("ColorSaturation", "enable")) == 1) {//3
+        setIdDisabled("txt3", false);
+        //setIdDisabled("slider3", false);
+        setIdDisplay("slider3", "block");
+    } else {
+        setIdDisabled("txt3", true);
+        //setIdDisabled("slider3", true);
+        setIdDisplay("slider3", "none");
+    }
+    
+    if (parseInt(colorOptionHx.getNodeValue("Contrast", "enable")) == 1) {
+        setIdDisabled("txt2", false);
+        //setIdDisabled("slider2", false);
+        setIdDisplay("slider2", "block");
+    } else {
+        
+        setIdDisabled("txt2", true);
+        //setIdDisabled("slider2", true);
+        setIdDisplay("slider2", "none");
+    }
+
+    if (parseInt(colorOptionHx.getNodeValue("Sharpness", "enable")) == "1") {
+        setIdDisabled("txt4", false);
+        //setIdDisabled("slider4", false);
+        setIdDisplay("slider4", "block");
+    } else {
+        setIdDisabled("txt4", true);
+        //setIdDisabled("slider4", true);
+        setIdDisplay("slider4", "none");
+    }
+}
+
+function AESetting() {
+    //初始值
+
+    //alert("AESetting 0 " + cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "enable"));
+    if (parseInt(cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "enable")) == 1) {
+
+        setIdDisabled("sel_profileSetting", false); 
+        setIdDisabled("sel_profileMode", false);
+        setIdDisabled("chk_profileFlicker", false);
+        setIdDisabled("sel_exposureMode", false);
+        setIdDisabled("sel_exposureShutter", false);
+        setIdDisabled("sel_exposureFlickerness", false);
+
+        //alert("AESetting 1 ");
+        arrayDayModeUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Mode", "uiOptions").split(",");
+        //alert("AESetting 1-2 ");
+        arrayDayModeCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Mode", "cgiOptions").split(",");
+        //alert("AESetting 1-3 ");
+        arrayDayAEModeUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "ExposureMode", "uiOptions").split(",");
+        //alert("AESetting 1-4 ");
+        arrayDayAEModeCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "ExposureMode", "cgiOptions").split(",");
+        //alert("AESetting 1-5 ");
+        arrayDayAEShutterUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "uiOptions").split(",");
+        //alert("AESetting 1-6 ");
+        arrayDayAEShutterCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "cgiOptions").split(",");
+        //alert("AESetting 1-7 ");
+        arrayDayAEFlickUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "uiOptions").split(",");
+        //alert("AESetting 1-8 ");
+        arrayDayAEFlickCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "cgiOptions").split(",");
+        //alert("AESetting 1-9 ");
+
+
+        arrayNightModeUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Mode", "uiOptions").split(",");
+        arrayNightModeCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Mode", "cgiOptions").split(",");
+        arrayNightAEModeUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "ExposureMode", "uiOptions").split(",");
+        arrayNightAEModeCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "ExposureMode", "cgiOptions").split(",");
+        arrayNightAEShutterUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "Shutter", "uiOptions").split(",");
+        arrayNightAEShutterCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "Shutter", "cgiOptions").split(",");
+        arrayNightAEFlickUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "Flickerless", "uiOptions").split(",");
+        arrayNightAEFlickCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "Flickerless", "cgiOptions").split(",");
+
+
+        //alert("AESetting 2 ");
+        //各個select的OPTION 和 初始值
+        //sel_profileSetting
+        hs = new HandleSelect("sel_profileSetting", 0);//Day Night
+        hs.addOpt(0, hl.get("DAY_MODE"), 0);
+        hs.addOpt(1, hl.get("NIGHT_MODE"), 1);
+
+        //alert("AESetting 3 ");
+        //sel_profileMode
+        hs = new HandleSelect("sel_profileMode", 0);
+        var tArray = parent.transLangArray(arrayDayModeUIOption);
+        for (var i = 0 ; i < arrayDayModeUIOption.length ; i++) {
+            hs.addOpt(i, hl.get(tArray[i]), i);
+        }
+
+        //chk_profileFlicker
+        setIdChecked("chk_profileFlicker", cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Flicker", "value"));
+
+
+        hs = new HandleSelect("sel_exposureMode", 0);
+        var tArray = parent.transLangArray(arrayDayAEModeUIOption);
+        for (var i = 0 ; i < arrayDayAEModeUIOption.length ; i++) {
+            //alert("tArray[i] = " + tArray[i]);
+            hs.addOpt(i, hl.get(tArray[i]), i);
+        }
+
+        hs = new HandleSelect("sel_exposureShutter", 0);
+        var tArray = parent.transLangArray(arrayDayAEShutterUIOption);
+        for (var i = 0 ; i < arrayDayAEShutterUIOption.length ; i++) {
+            hs.addOpt(i, arrayDayAEShutterUIOption[i], i);
+        }
+
+        hs = new HandleSelect("sel_exposureFlickerness", 0);
+        var tArray = parent.transLangArray(arrayDayAEFlickUIOption);
+        for (var i = 0 ; i < arrayDayAEFlickUIOption.length ; i++) {
+            hs.addOpt(i, arrayDayAEFlickUIOption[i], i);
+        }
+
+        setIdValue("sel_profileMode", cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Mode", "value"));
+        //AEMODE給值
+
+        setIdValue("sel_exposureMode", cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "ExposureMode", "value"));
+        setIdValue("sel_exposureShutter", cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "value"));
+        setIdValue("sel_exposureFlickerness", cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "value"));
+
+
+        //開始檢查可不可以set
+        var enableProfile;
+        var enableAEMode;
+
+        enableProfile = checkProfileEnable(4, "IPCamCameraProfile", "DayProfile", "Mode", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(4, "IPCamCameraProfile", "DayProfile", "Mode", "enableByAEMode");
+        enableIdDisable("sel_profileMode", enableProfile, enableAEMode);
+
+        //Flick checkbox
+        enableProfile = checkProfileEnable(4, "IPCamCameraProfile", "DayProfile", "Flicker", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(4, "IPCamCameraProfile", "DayProfile", "Flicker", "enableByAEMode");
+        enableIdDisable("chk_profileFlicker", enableProfile, enableAEMode);
+
+
+        //EX 初始 最大層先看 然後 init值
+        //checkEnable(5, "sel_exposureMode", "IPCamCameraProfile", "DayProfile", "Exposure", "enableByProfileMode");
+
+        enableProfile = checkProfileEnable(4, "IPCamCameraProfile", "DayProfile", "Exposure", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(4, "IPCamCameraProfile", "DayProfile", "Exposure", "enableByAEMode");
+
+
+        if ((enableProfile & enableAEMode) == 1) {  
+            setIdDisabled("tr_exposureSetting", false);
+            setIdDisabled("sel_exposureMode", false);
+            setIdDisabled("sel_exposureShutter", false);
+            setIdDisabled("sel_exposureFlickerness", false);
+
+
+            //檢查各個欄位的可不可以SET
+            enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "ExposureMode", "enableByProfileMode");
+            enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "ExposureMode", "enableByAEMode");
+            enableIdDisable("sel_exposureMode", enableProfile, enableAEMode);
+
+            enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "enableByProfileMode");
+            enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "enableByAEMode");
+            enableIdDisable("sel_exposureShutter", enableProfile, enableAEMode);
+            //alert("sel_exposureShutter  enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+
+            enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "enableByProfileMode");
+            enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "enableByAEMode");
+            enableIdDisable("sel_exposureFlickerness", enableProfile, enableAEMode);
+            //alert("sel_exposureFlickerness  enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+
+            //enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "enableByProfileMode");
+            //enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "enableByProfileMode");
+
+
+        } else {
+            setIdDisabled("tr_exposureSetting", true);
+            setIdDisabled("sel_exposureMode", true);
+            setIdDisabled("sel_exposureShutter", true);
+            setIdDisabled("sel_exposureFlickerness", true);
+
+            
+
+            
+        }
+    } else {
+
+        //alert("here");
+        setIdDisabled("sel_profileSetting", true);
+        setIdDisabled("sel_profileMode", true);
+        setIdDisabled("chk_profileFlicker", true);
+        setIdDisabled("sel_exposureMode", true);
+        setIdDisabled("sel_exposureShutter", true);
+        setIdDisabled("sel_exposureFlickerness", true);
+
+
+        //alert("AESetting 1 ");
+        arrayDayModeUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Mode", "uiOptions").split(",");
+        //alert("AESetting 1-2 ");
+        arrayDayModeCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Mode", "cgiOptions").split(",");
+        //alert("AESetting 1-3 ");
+        arrayDayAEModeUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "ExposureMode", "uiOptions").split(",");
+        //alert("AESetting 1-4 ");
+        arrayDayAEModeCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "ExposureMode", "cgiOptions").split(",");
+        //alert("AESetting 1-5 ");
+        arrayDayAEShutterUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "uiOptions").split(",");
+        //alert("AESetting 1-6 ");
+        arrayDayAEShutterCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "cgiOptions").split(",");
+        //alert("AESetting 1-7 ");
+        arrayDayAEFlickUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "uiOptions").split(",");
+        //alert("AESetting 1-8 ");
+        arrayDayAEFlickCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "cgiOptions").split(",");
+        //alert("AESetting 1-9 ");
+
+
+        arrayNightModeUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Mode", "uiOptions").split(",");
+        arrayNightModeCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Mode", "cgiOptions").split(",");
+        arrayNightAEModeUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "ExposureMode", "uiOptions").split(",");
+        arrayNightAEModeCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "ExposureMode", "cgiOptions").split(",");
+        arrayNightAEShutterUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "Shutter", "uiOptions").split(",");
+        arrayNightAEShutterCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "Shutter", "cgiOptions").split(",");
+        arrayNightAEFlickUIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "Flickerless", "uiOptions").split(",");
+        arrayNightAEFlickCGIOption = cameraProfileHx.getNodeValue("IPCamCameraProfile", "NightProfile", "Exposure", "Flickerless", "cgiOptions").split(",");
+
+        hs = new HandleSelect("sel_profileSetting", 0);//Day Night
+        hs.addOpt(0, "", 0);
+
+
+
+        //sel_profileMode
+        hs = new HandleSelect("sel_profileMode", 0);
+        hs.addOpt(0, "", 0);
+
+        //chk_profileFlicker
+        setIdChecked("chk_profileFlicker", cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Flicker", "value"));
+
+
+        hs = new HandleSelect("sel_exposureMode", 0);
+        hs.addOpt(0, "", 0);
+
+        hs = new HandleSelect("sel_exposureShutter", 0);
+        hs.addOpt(0, "", 0);
+
+        hs = new HandleSelect("sel_exposureFlickerness", 0);
+        hs.addOpt(0, "", 0);
+
+        setIdValue("sel_profileSetting", 0);
+        setIdValue("sel_profileMode", 0);
+        setIdValue("chk_profileFlicker", 0);
+        setIdValue("sel_exposureMode", 0);
+        setIdValue("sel_exposureShutter", 0);
+        setIdValue("sel_exposureFlickerness", 0);
+
+
+    }
+    
+
+    
+
+
+
+
+}
+
+
+function enableIdDisable() {
+    var args = arguments;
+    var id = args[0];
+    var profile = args[1] ? args[1] : null;
+    var aeMode = args[2] ? args[2] : null;
+
+    if ((parseInt(profile) & parseInt(aeMode)) == 1) {
+        setIdDisabled(id, false);
+    } else {
+        setIdDisabled(id, true);
+    }
+
+}
+function checkAEModeEnable() {
+    var args = arguments;
+    var length = args[0];
+    var node1 = args[1] ? args[1] : null;
+    var node2 = args[2] ? args[2] : null;
+    var node3 = args[3] ? args[3] : null;
+    var node4 = args[4] ? args[4] : null;
+    var node5 = args[5] ? args[5] : null;
+
+    if (length == 3) {
+        if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3)) == 0) {
+            //不可SET
+            //setIdDisabled(id, true);
+            return 0;
+        } else if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3)) == 65535) {
+            //可SET
+            //setIdDisabled(id, false);
+            return 1;
+        } else {//
+            if (parseInt(Math.pow(2, getIdValue("sel_exposureMode"))) & parseInt(cameraProfileHx.getNodeValue(node1, node2, node3)) > 0) {
+                //可SET
+                //setIdDisabled(id, false);
+                return 1;
+            } else {
+                //不可SET
+                //setIdDisabled(id, true);
+                return 0;
+            }
+        }
+    } else if (length == 4) {
+        if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4)) == 0) {
+            //不可SET
+            //setIdDisabled(id, true);
+            return 0;
+        } else if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4)) == 65535) {
+            //可SET
+            //setIdDisabled(id, false);
+            return 1;
+        } else {
+            if (parseInt(Math.pow(2, getIdValue("sel_exposureMode"))) & parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4)) > 0) {
+                //可SET
+                //setIdDisabled(id, false);
+                return 1;
+            } else {
+                //不可SET
+                //setIdDisabled(id, true);
+                return 0;
+            }
+        }
+    } else {
+        if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5)) == 0) {
+            //不可SET
+            //setIdDisabled(id, true);
+            return 0;
+        } else if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5)) == 65535) {
+            //可SET
+            //setIdDisabled(id, false);
+            return 1;
+        } else {
+            //alert("node4 = " + node4 + " Math.pow(2, cameraProfileHx.getNodeValue(node1, node2, node3, node4, 'value') = " + Math.pow(2, cameraProfileHx.getNodeValue(node1, node2, node3, node4, "value")) + " cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5) = " + cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5));
+            if ((parseInt(Math.pow(2, getIdValue("sel_exposureMode"))) & parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5))) > 0) {
+                //可SET
+                //setIdDisabled(id, false);
+                return 1;
+            } else {
+                //不可SET
+                //setIdDisabled(id, true);
+                return 0;
+            }
+        }
+    }
+
+}
+
+function checkProfileEnable() {
+    //args[0]	length support 5 layers
+    //args[1]   ID
+    //args[1~length-1]	FatherNode
+    //args[length] sonNode
+    //return 0 => 不能SET 1=> 可以SET
+    var args = arguments;
+    var length = args[0];
+    var node1 = args[1] ? args[1] : null;
+    var node2 = args[2]?args[2]:null;
+    var node3 = args[3]?args[3]:null;   
+    var node4 = args[4]?args[4]:null;
+    var node5 = args[5]?args[5]:null;
+    
+    if (length == 3) {
+        if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3)) == 0) {
+            //不可SET
+            //setIdDisabled(id, true);
+            return 0;
+        } else if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3)) == 65535) {
+            //可SET
+            //setIdDisabled(id, false);
+            return 1;
+        } else {
+            if (parseInt((Math.pow(2, getIdValue("sel_profileMode"))) & parseInt(cameraProfileHx.getNodeValue(node1, node2, node3))) > 0) {//
+                //可SET
+                //setIdDisabled(id, false);
+                return 1;
+            } else {
+                //不可SET
+                //setIdDisabled(id, true);
+                return 0;
+            }
+        }
+    } else if (length == 4) {
+        if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4)) == 0) {
+            //不可SET
+            //setIdDisabled(id, true);
+            return 0;
+        } else if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4)) == 65535) {
+            //可SET
+            //setIdDisabled(id, false);
+            return 1;
+        } else {
+            if ((parseInt(Math.pow(2, getIdValue("sel_profileMode"))) & parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4))) > 0) {
+                //可SET
+                //setIdDisabled(id, false);
+                return 1;
+            } else {
+                //不可SET
+                //setIdDisabled(id, true);
+                return 0;
+            }
+        }
+    } else {
+        if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5)) == 0) {
+            //不可SET
+            //setIdDisabled(id, true);
+            return 0;
+        } else if (parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5)) == 65535) {
+            //可SET
+            //setIdDisabled(id, false);
+            return 1;
+        } else {
+            //alert("node4 = " + node4 + " Math.pow(2, cameraProfileHx.getNodeValue(node1, node2, node3, node4, 'value') = " + Math.pow(2, cameraProfileHx.getNodeValue(node1, node2, node3, node4, "value")) + " cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5) = " + cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5));
+            if ((parseInt(Math.pow(2, getIdValue("sel_profileMode"))) & parseInt(cameraProfileHx.getNodeValue(node1, node2, node3, node4, node5))) > 0) {
+                //可SET
+                //setIdDisabled(id, false);
+                return 1;
+            } else {
+                //不可SET
+                //setIdDisabled(id, true);
+                return 0;
+            }
+        }
+    }
+
+}
+function initFunc() {
+    var funcNum = 0;
+    var Cnt = 0;
+    var i = 0;
+    var hs = new HandleSelect("sel_channel_num", 0);
+    var ch_num = parent.g_total_ch_num;
+
+    for (i = 0; i < ch_num; i++) {
+        hs.addOpt(i, i + 1, i);
+    }
+
+    
+
+
+
+    funcNum = setHx.getNodeChildSize("EVIDEOADJUST");
+    for (Cnt = 0; Cnt < funcNum; Cnt++) {
+
+        switch (setHx.getNodeChildName("EVIDEOADJUST", Cnt)) {
+
+            case "Brightness":
+                setIdInnerHTML("td_Brightness", hl.get("BRIGHTNESS"));
+                //sld1 = new Slide("txt1", "scl1", "idx1", 490, 240, 6, -2, 0, 100, 100);
+                break;
+            case "Contrast":
+                setIdInnerHTML("td_Contrast", hl.get("CONTRAST"));
+                //sld2 = new Slide("txt2", "scl2", "idx2", 525, 240, 6, -2, 0, 100, 100);
+                break;
+            case "Color":
+                setIdInnerHTML("td_Color", hl.get("COLOR"));
+                //sld3 = new Slide("txt3", "scl3", "idx3", 560, 240, 6, -2, 0, 100);  
+                break;
+            case "Sharpness":
+                setIdInnerHTML("td_Sharpness", hl.get("SHARPNESS")); //multi-lang
+                //sld3 = new Slide("txt3", "scl3", "idx3", 560, 240, 6, -2, 0, 100);  
+                break;
+            case "ProfileSetting":
+                setIdDisplay("tr_profileSetting", "table-row");
+                setIdInnerHTML("td_profileSetting", hl.get("PROFILE_SETTING")); //multi-lang
+                break;
+            case "ProfileMode":
+                setIdDisplay("tr_profileMode", "table-row");
+                setIdInnerHTML("td_profileMode", hl.get("PROFILE_MODE")); //multi-lang
+                break;
+            case "ProfileFlicker":
+                setIdDisplay("tr_profileFlicker", "table-row");
+                setIdInnerHTML("td_profileFlicker", hl.get("FLICKER")); //multi-lang
+                break;
+            case "ExposureSetting":
+                setIdDisplay("tr_exposureSetting", "table-row");
+                setIdInnerHTML("legend_exposureSetting", hl.get("EXPOSURE_SETTINGS")); //multi-lang
+                setIdInnerHTML("td_exposureMode", hl.get("MODE")); //multi-lang
+                setIdInnerHTML("td_exposureShutter", hl.get("SHUTTER")); //multi-lang
+                setIdInnerHTML("td_exposureFlickerness", hl.get("FLICKERNESS")); //multi-lang
+                break;
+            case "DeviceTitle":
+            	break;
+            case "RecordDualStream":
+            	var record = parent.SetHx.getNodeValue("CameraSetting", "RecordDualStream").split(",");
+			    var hs = new HandleSelect("sel_record_dual_stream", 0);
+			    for (var i = 0; i < record.length; i++) {
+			        hs.addOpt(i, hl.get(record[i].toUpperCase()), i);
+			    }
+            	break;
+            case "RecordMode":
+	            var mode = parent.SetHx.getNodeValue("CameraSetting", "RecordMode").split(",");
+			    var tArray = parent.transLangArray(mode);
+			    var hs = new HandleSelect("sel_record_mode", 0);
+			    for (var i = 0; i < mode.length; i++) {
+			        hs.addOpt(i, hl.get(tArray[i]), mode[i]);
+			    }
+            	break;
+            case "Ratio":
+            	var ratio = parent.SetHx.getNodeValue("CameraSetting", "Ratio").split(",");
+			    var tArray = parent.transLangArray(ratio);
+			    var hs = new HandleSelect("sel_ratio", 0);
+			    for (var i = 0; i < ratio.length; i++) {
+			        hs.addOpt(i, ratio[i], ratio[i]);
+			    }
+            	break;
+            case "#text":   //******* for chrome
+                funcNum++;
+                break;
+        }
+    }
+
+    EFDEF_("^td_").className("txtLeft");
+
+    setIdInnerHTML("td_connected_channel", hl.get("CONNECTED_CHANNEL"));
+    setIdInnerHTML("td_mask_channel", hl.get("MASK_CHANNEL"));
+    setIdInnerHTML("td_channel_num", hl.get("CHANNEL_NUMBER"));
+    setIdInnerHTML("td_ratio", hl.get("RATIO"));
+    setIdInnerHTML("td_hallway_mode", hl.get("HALLWAY_MODE"));
+    
+    setIdInnerHTML("td_record_mode", hl.get("RECORD_MODE"));
+	setIdInnerHTML("td_title", hl.get("DEVICE_TITLE"));
+	setIdInnerHTML("td_record_dual_stream", hl.get("RECORD_DUAL_STREAM"));
+    
+    setIdValue("btn_Apply_To", hl.get("APPLY_TO"));
+    setIdValue("btn_save", hl.get("SAVE"));
+}
+
+
+function selectExposureMode() {
+    //影響 AE兩個選項
+    var str;
+    if (getIdValue("sel_profileSetting").toInt() == 0) {
+        str = "DayProfile";
+    } else {
+        str = "NightProfile";
+    }
+
+    enableProfile = checkProfileEnable(4, "IPCamCameraProfile", str, "Exposure", "enableByProfileMode");
+    enableAEMode = checkAEModeEnable(4, "IPCamCameraProfile", str, "Exposure", "enableByAEMode");
+
+
+    if ((parseInt(enableProfile) & parseInt(enableAEMode)) == 1) {
+        setIdDisabled("tr_exposureSetting", false);
+        setIdDisabled("sel_exposureMode", false);
+        setIdDisabled("sel_exposureShutter", false);
+        setIdDisabled("sel_exposureFlickerness", false);
+
+        //檢查各個欄位的可不可以SET
+
+        enableProfile = checkProfileEnable(5, "IPCamCameraProfile", str, "Exposure", "Shutter", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", str, "Exposure", "Shutter", "enableByAEMode");
+        enableIdDisable("sel_exposureShutter", enableProfile, enableAEMode);
+        //alert("sel_exposureShutter  enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+
+        enableProfile = checkProfileEnable(5, "IPCamCameraProfile", str, "Exposure", "Flickerless", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", str, "Exposure", "Flickerless", "enableByAEMode");
+        enableIdDisable("sel_exposureFlickerness", enableProfile, enableAEMode);
+        //alert("sel_exposureFlickerness  enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+
+        //enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "enableByProfileMode");
+        //enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "enableByProfileMode");
+
+
+    } else {
+        setIdDisabled("tr_exposureSetting", true);
+        setIdDisabled("sel_exposureMode", true);
+        setIdDisabled("sel_exposureShutter", true);
+        setIdDisabled("sel_exposureFlickerness", true);
+    }
+
+}
+
+function selectProfileMode() {
+    //影響 AE三個選項
+    var str;
+    if (getIdValue("sel_profileSetting").toInt() == 0) {
+        str = "DayProfile";
+    } else {
+        str = "NightProfile";
+    }
+
+    enableProfile = checkProfileEnable(4, "IPCamCameraProfile", str, "Exposure", "enableByProfileMode");
+    enableAEMode = checkAEModeEnable(4, "IPCamCameraProfile", str, "Exposure", "enableByAEMode");
+
+    //alert("selectProfileMode 0 " + (parseInt(enableProfile) & parseInt(enableAEMode)));
+    if ((parseInt(enableProfile) & parseInt(enableAEMode)) == 1) {
+        setIdDisabled("tr_exposureSetting", false);
+        setIdDisabled("sel_exposureMode", false);
+        setIdDisabled("sel_exposureShutter", false);
+        setIdDisabled("sel_exposureFlickerness", false);
+
+        //檢查各個欄位的可不可以SET
+        enableProfile = checkProfileEnable(5, "IPCamCameraProfile", str, "Exposure", "ExposureMode", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", str, "Exposure", "ExposureMode", "enableByAEMode");
+        enableIdDisable("sel_exposureMode", enableProfile, enableAEMode);
+
+        //alert("sel_exposureMode  " + " enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+        enableProfile = checkProfileEnable(5, "IPCamCameraProfile", str, "Exposure", "Shutter", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", str, "Exposure", "Shutter", "enableByAEMode");
+        enableIdDisable("sel_exposureShutter", enableProfile, enableAEMode);
+        //alert("sel_exposureShutter  enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+        //alert("sel_exposureShutter  " + " enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+
+        enableProfile = checkProfileEnable(5, "IPCamCameraProfile", str, "Exposure", "Flickerless", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", str, "Exposure", "Flickerless", "enableByAEMode");
+        enableIdDisable("sel_exposureFlickerness", enableProfile, enableAEMode);
+        //alert("sel_exposureFlickerness  enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+        //alert("sel_exposureFlickerness  " + " enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+
+        //enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "enableByProfileMode");
+        //enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "enableByProfileMode");
+
+
+    } else {
+        setIdDisabled("tr_exposureSetting", true);
+        setIdDisabled("sel_exposureMode", true);
+        setIdDisabled("sel_exposureShutter", true);
+        setIdDisabled("sel_exposureFlickerness", true);
+
+    }
+
+}
+function selectProfileSetting() {
+    
+    var str;
+    if (getIdValue("sel_profileSetting").toInt() == 0) {
+        str = "DayProfile";
+
+        //sel_profileMode
+        hs = new HandleSelect("sel_profileMode", 0);
+        for (var i = 0 ; i < arrayDayModeUIOption.length ; i++) {
+            hs.addOpt(i, arrayDayModeUIOption[i], i);
+        }
+
+        //chk_profileFlicker
+        //setIdChecked("chk_profileFlicker", cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Flicker", "value"));
+
+
+        hs = new HandleSelect("sel_exposureMode", 0);
+        for (var i = 0 ; i < arrayDayAEModeUIOption.length ; i++) {
+            hs.addOpt(i, arrayDayAEModeUIOption[i], i);
+        }
+
+        hs = new HandleSelect("sel_exposureShutter", 0);
+        for (var i = 0 ; i < arrayDayAEShutterUIOption.length ; i++) {
+            hs.addOpt(i, arrayDayAEShutterUIOption[i], i);
+        }
+
+        hs = new HandleSelect("sel_exposureFlickerness", 0);
+        for (var i = 0 ; i < arrayDayAEFlickUIOption.length ; i++) {
+            hs.addOpt(i, arrayDayAEFlickUIOption[i], i);
+        }
+    } else {
+        str = "NightProfile";
+
+        //sel_profileMode
+        hs = new HandleSelect("sel_profileMode", 0);
+        for (var i = 0 ; i < arrayNightModeUIOption.length ; i++) {
+            hs.addOpt(i, arrayNightModeUIOption[i], i);
+        }
+
+        //chk_profileFlicker
+        //setIdChecked("chk_profileFlicker", cameraProfileHx.getNodeValue("IPCamCameraProfile", "DayProfile", "Flicker", "value"));
+
+
+        hs = new HandleSelect("sel_exposureMode", 0);
+        for (var i = 0 ; i < arrayNightAEModeUIOption.length ; i++) {
+            hs.addOpt(i, arrayNightAEModeUIOption[i], i);
+        }
+
+        hs = new HandleSelect("sel_exposureShutter", 0);
+        for (var i = 0 ; i < arrayNightAEShutterUIOption.length ; i++) {
+            hs.addOpt(i, arrayNightAEShutterUIOption[i], i);
+        }
+
+        hs = new HandleSelect("sel_exposureFlickerness", 0);
+        for (var i = 0 ; i < arrayNightAEFlickUIOption.length ; i++) {
+            hs.addOpt(i, arrayNightAEFlickUIOption[i], i);
+        }
+    }
+
+    if (parseInt(cameraProfileHx.getNodeValue("IPCamCameraProfile", str, "enable")) == 1) {
+
+        setIdDisabled("sel_profileSetting", false);
+        setIdDisabled("sel_profileMode", false);
+        setIdDisabled("chk_profileFlicker", false);
+        setIdDisabled("sel_exposureMode", false);
+        setIdDisabled("sel_exposureShutter", false);
+        setIdDisabled("sel_exposureFlickerness", false);
+
+        //各個select的OPTION 和 初始值
+
+        
+
+        //chk_profileFlicker
+        setIdChecked("chk_profileFlicker", cameraProfileHx.getNodeValue("IPCamCameraProfile", str, "Flicker", "value"));
+
+        setIdValue("sel_profileMode", cameraProfileHx.getNodeValue("IPCamCameraProfile", str, "Mode", "value"));
+        //AEMODE給值
+
+        setIdValue("sel_exposureMode", cameraProfileHx.getNodeValue("IPCamCameraProfile", str, "Exposure", "ExposureMode", "value"));
+        setIdValue("sel_exposureShutter", cameraProfileHx.getNodeValue("IPCamCameraProfile", str, "Exposure", "Shutter", "value"));
+        setIdValue("sel_exposureFlickerness", cameraProfileHx.getNodeValue("IPCamCameraProfile", str, "Exposure", "Flickerless", "value"));
+
+
+        //開始檢查可不可以set
+        var enableProfile;
+        var enableAEMode;
+
+        enableProfile = checkProfileEnable(4, "IPCamCameraProfile", str, "Mode", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(4, "IPCamCameraProfile", str, "Mode", "enableByAEMode");
+        enableIdDisable("sel_profileMode", enableProfile, enableAEMode);
+
+        //Flick checkbox
+        enableProfile = checkProfileEnable(4, "IPCamCameraProfile", str, "Flicker", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(4, "IPCamCameraProfile", str, "Flicker", "enableByAEMode");
+        enableIdDisable("chk_profileFlicker", enableProfile, enableAEMode);
+
+
+        //EX 初始 最大層先看 然後 init值
+        //checkEnable(5, "sel_exposureMode", "IPCamCameraProfile", "DayProfile", "Exposure", "enableByProfileMode");
+
+        enableProfile = checkProfileEnable(4, "IPCamCameraProfile", str, "Exposure", "enableByProfileMode");
+        enableAEMode = checkAEModeEnable(4, "IPCamCameraProfile", str, "Exposure", "enableByAEMode");
+
+
+        if ((parseInt(enableProfile) & parseInt(enableAEMode)) == 1) {
+            setIdDisabled("tr_exposureSetting", false);
+            setIdDisabled("sel_exposureMode", false);
+            setIdDisabled("sel_exposureShutter", false);
+            setIdDisabled("sel_exposureFlickerness", false);
+
+            //檢查各個欄位的可不可以SET
+            enableProfile = checkProfileEnable(5, "IPCamCameraProfile", str, "Exposure", "ExposureMode", "enableByProfileMode");
+            enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", str, "Exposure", "ExposureMode", "enableByAEMode");
+            enableIdDisable("sel_exposureMode", enableProfile, enableAEMode);
+
+            enableProfile = checkProfileEnable(5, "IPCamCameraProfile", str, "Exposure", "Shutter", "enableByProfileMode");
+            enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", str, "Exposure", "Shutter", "enableByAEMode");
+            enableIdDisable("sel_exposureShutter", enableProfile, enableAEMode);
+            //alert("sel_exposureShutter  enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+
+            enableProfile = checkProfileEnable(5, "IPCamCameraProfile", str, "Exposure", "Flickerless", "enableByProfileMode");
+            enableAEMode = checkAEModeEnable(5, "IPCamCameraProfile", str, "Exposure", "Flickerless", "enableByAEMode");
+            enableIdDisable("sel_exposureFlickerness", enableProfile, enableAEMode);
+            //alert("sel_exposureFlickerness  enableProfile = " + enableProfile + " enableAEMode = " + enableAEMode);
+
+            //enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Shutter", "enableByProfileMode");
+            //enableProfile = checkProfileEnable(5, "IPCamCameraProfile", "DayProfile", "Exposure", "Flickerless", "enableByProfileMode");
+
+
+        } else {
+            setIdDisabled("tr_exposureSetting", true);
+            setIdDisabled("sel_exposureMode", true);
+            setIdDisabled("sel_exposureShutter", true);
+            setIdDisabled("sel_exposureFlickerness", true);
+
+        }
+    } else {
+        setIdDisabled("sel_profileSetting", true);
+        setIdDisabled("sel_profileMode", true);
+        setIdDisabled("chk_profileFlicker", true);
+        setIdDisabled("sel_exposureMode", true);
+        setIdDisabled("sel_exposureShutter", true);
+        setIdDisabled("sel_exposureFlickerness", true);
+    }
+}
+
+function selectCamera(){
+    var type = hybridHx.getNodeValue("Camera" + getIdSelectText("sel_channel_num"), "type");
+
+    if (type == "Analog") {
+        setObjDisabled(true, true, true, true, true, true, true, false, true, true);
+        
+		setIdDisplay("tr_Hallway", "none");
+		
+        setIdDisabled("txt4", true);
+        setIdDisplay("slider4", "none");
+        setIdDisplay("txt4", "none");
+        setIdDisplay("td_Sharpness", "none");
+
+        setIdDisabled("txt1", false);
+        setIdDisplay("slider1", "block");
+
+        setIdDisabled("txt2", false);
+        setIdDisplay("slider2", "block");
+
+        setIdDisabled("txt3", false);
+        setIdDisplay("slider3", "block");
+
+
+        var str = "Camera" + getIdSelectText("sel_channel_num");
+
+        setIdValue("txt1", hybridHx.getNodeValue(str, "Analog", "brightnessLevel"));
+        $("#slider1").slider("option", "value", hybridHx.getNodeValue(str, "Analog","brightnessLevel"));
+
+        setIdValue("txt2", hybridHx.getNodeValue(str, "Analog", "contrastLevel"));
+        $("#slider2").slider("option", "value", hybridHx.getNodeValue(str, "Analog", "contrastLevel"));
+
+        setIdValue("txt3", hybridHx.getNodeValue(str, "Analog", "saturationLevel"));
+        $("#slider3").slider("option", "value", hybridHx.getNodeValue(str, "Analog", "saturationLevel"));
+
+		setIdValue("txt_device_title",hybridHx.getNodeValue(str, "Analog", "title"));
+		setIdValue("sel_record_dual_stream",hybridHx.getNodeValue(str, "Analog", "recordDual"));
+		setIdValue("sel_record_mode",hybridHx.getNodeValue(str, "Analog", "recordMode"));
+		
+		parent.setSingleChannelScreen(getIdValue("sel_channel_num").toInt());
+
+        
+    } else if (type == "IPCam") {
+        setObjDisabled(false, false, false, false, false, false, false, false, false, false);
+        setIdDisabled("txt4", false);
+        setIdDisplay("slider4", "block");
+        setIdDisplay("txt4", "block");
+        setIdDisplay("td_Sharpness", "block");
+
+        setIdDisabled("txt1", false);
+        setIdDisplay("slider1", "block");
+
+        setIdDisabled("txt2", false);
+        setIdDisplay("slider2", "block");
+
+        setIdDisabled("txt3", false);
+        setIdDisplay("slider3", "block");
+
+        var str = "camera" + getIdSelectText("sel_channel_num");
+
+        //setIdInnerHTML("txt_Title", hx.getNodeValue(str, "title"));
+        if (setHx.getNode("EVIDEOADJUST", "Brightness")) {
+            //sld1.setValue(hx.getNodeValue(str, "brightnessLevel"));
+            setIdValue("txt1", hx.getNodeValue(str, "brightnessLevel"));
+            $("#slider1").slider("option", "value", hx.getNodeValue(str, "brightnessLevel"));
+        }
+        if (setHx.getNode("EVIDEOADJUST", "Contrast")) {
+            //sld2.setValue(hx.getNodeValue(str, "contrastLevel"));
+            setIdValue("txt2", hx.getNodeValue(str, "contrastLevel"));
+            $("#slider2").slider("option", "value", hx.getNodeValue(str, "contrastLevel"));
+        }
+        if (setHx.getNode("EVIDEOADJUST", "Color")) {
+            //sld3.setValue(hx.getNodeValue(str, "saturationLevel"));
+            setIdValue("txt3", hx.getNodeValue(str, "saturationLevel"));
+            $("#slider3").slider("option", "value", hx.getNodeValue(str, "saturationLevel"));
+        }
+
+        if (setHx.getNode("EVIDEOADJUST", "Sharpness")) {
+            //sld3.setValue(hx.getNodeValue(str, "saturationLevel"));
+            setIdValue("txt4", hx.getNodeValue(str, "sharpnessLevel"));
+            $("#slider4").slider("option", "value", hx.getNodeValue(str, "sharpnessLevel"));
+        }
+
+        if (setHx.getNode("EVIDEOADJUST", "ConnectedChannel")) {
+            setIdChecked("chk_connected_channel", hx.getNodeValue(str, "connectChannel"));
+        }
+
+        if (setHx.getNode("EVIDEOADJUST", "MaskChennel")) {
+            setIdChecked("chk_mask_channel", hx.getNodeValue(str, "maskChannel"));
+        }
+        
+        if (setHx.getNode("EVIDEOADJUST", "Ratio")) {
+            setIdChecked("chk_mask_channel", hx.getNodeValue(str, "maskChannel"));
+        }
+
+        setIdDisplay("tr_Hallway", "none");
+        checkHallway();
+        if (parent.firstTimeFlag == 0) {    //******* John add 20130624
+            parent.firstTimeFlag = 1;
+            parent.openLiveStreamAppletLivePage();
+        }
+
+        //add by GG  值和可不可以ser都要用
+        //重新init的意思
+        cameraProfileHx.setUrl("../cgi-bin/IPCamCameraProfile.xml?" + "ip=" + hx.getNodeValue(str, "ipAddress") + "&HttpPort=" + hx.getNodeValue(str, "httpPort") + "&username=" +
+            hx.getNodeValue(str, "username") + "&password=" + hx.getNodeValue(str, "password"));
+
+        colorOptionHx.setUrl("../cgi-bin/IPCamColorOptions.xml?" + "ip=" + hx.getNodeValue(str, "ipAddress") + "&HttpPort=" + hx.getNodeValue(str, "httpPort") + "&username=" +
+            hx.getNodeValue(str, "username") + "&password=" + hx.getNodeValue(str, "password"));
+
+
+        AESetting();
+        colorOption();
+        
+        setIdValue("txt_device_title",hx.getNodeValue(str, "title"));
+		setIdValue("sel_record_dual_stream",hx.getNodeValue(str, "recordDual"));
+		setIdValue("sel_record_mode",hx.getNodeValue(str, "recordMode"));
+		setIdValue("sel_ratio",hx.getNodeValue(str, "ratio"));
+		
+
+        //parent.applet.setSingleChannelScreen(getIdValue("sel_channel_num"));
+        parent.applet.setSingleChannelScreen(getIdValue("sel_channel_num"), 1);
+    } else{
+        setObjDisabled(true, true, true, true, true, true, true, true, true, true);
+
+		setIdDisplay("tr_Hallway", "none");
+		
+        setIdDisabled("txt4", true);
+        setIdDisplay("slider4", "none");
+        setIdDisplay("txt4", "block");
+        setIdDisplay("td_Sharpness", "block");
+
+        setIdDisabled("txt1", true);
+        setIdDisplay("slider1", "none");
+
+        setIdDisabled("txt2", true);
+        setIdDisplay("slider2", "none");
+
+        setIdDisabled("txt3", true);
+        setIdDisplay("slider3", "none");
+        
+        parent.setSingleChannelScreen(getIdValue("sel_channel_num").toInt());
+    }
+    
+}
+
+function GetStatusXML() {
+    statusHx.setUrl("../cgi-bin/ENVR8304XIPCamList.xml");
+    hx.setUrl("../cgi-bin/IPCam.xml");
+}
+function GetXML() {
+
+
+    
+    
+
+    //if()
+    cameraProfileHx.setUrl("../cgi-bin/IPCamCameraProfile.xml?" + "ip=" + hx.getNodeValue("camera1", "ipAddress") + "&HttpPort=" + hx.getNodeValue("camera1", "httpPort") + "&username=" +
+        hx.getNodeValue("camera1", "username") + "&password=" + hx.getNodeValue("camera1", "password"));
+
+    colorOptionHx.setUrl("../cgi-bin/IPCamColorOptions.xml?" + "ip=" + hx.getNodeValue("camera1", "ipAddress") + "&HttpPort=" + hx.getNodeValue("camera1", "httpPort") + "&username=" +
+        hx.getNodeValue("camera1", "username") + "&password=" + hx.getNodeValue("camera1", "password"));
+
+	
+}
+
+function syncDataAnalog() {
+    var str = "Camera" + getIdSelectText("sel_channel_num");
+    hybridHx.setNodeValue(1, str, "modified");
+    hybridHx.setNodeValue(getIdValue("txt1"), str, "Analog" , "brightnessLevel");
+    hybridHx.setNodeValue(getIdValue("txt2"), str, "Analog", "contrastLevel");
+    hybridHx.setNodeValue(getIdValue("txt3"), str, "Analog", "saturationLevel");
+
+
+}
+
+function syncData(){
+    var str = "camera" + getIdSelectText("sel_channel_num");
+    var dayNight;
+    if (getIdValue("sel_profileSetting").toInt() == 0) {
+        dayNight = "DayProfile";
+    } else {
+        dayNight = "NightProfile";
+    }
+	var funcNum = 0;
+	var Cnt = 0;
+	hx.setNodeValue(1, str, "modified");
+	funcNum = setHx.getNodeChildSize("EVIDEOADJUST");
+	for (Cnt = 0; Cnt < funcNum; Cnt++) {
+	    switch (setHx.getNodeChildName("EVIDEOADJUST", Cnt)) {
+	        case "Brightness":
+                hx.setNodeValue(getIdValue("txt1"),str,"brightnessLevel");
+	            break;
+	        case "Contrast":
+                hx.setNodeValue(getIdValue("txt2"),str,"contrastLevel");
+	            break;
+	        case "Color":
+                hx.setNodeValue(getIdValue("txt3"), str, "saturationLevel");
+                break;
+            case "Sharpness":
+                hx.setNodeValue(getIdValue("txt4"), str, "sharpnessLevel");
+                break;
+            case "ConnectedChannel":
+                hx.setNodeValue(getIdChecked("chk_connected_channel"), str, "connectChannel");
+                break;
+            case "MaskChennel":
+                hx.setNodeValue(getIdChecked("chk_mask_channel"), str, "maskChannel");
+                break;
+	        case "ProfileSetting":
+	            //cameraProfileHx.setNodeValue(getIdChecked("chk_mask_channel"), "IPCamCameraProfile", dayNight, "value");
+	            break;
+	        case "ProfileMode":
+	            //setIdDisplay("tr_profileMode", "table-row");
+	            //alert("ProfileMode000");
+	            cameraProfileHx.setNodeValue(getIdValue("sel_profileMode"), "IPCamCameraProfile", dayNight, "Mode", "value");
+	            if (dayNight == "DayProfile") {
+	                cameraProfileHx.setNodeValue(arrayDayModeCGIOption[getIdValue("sel_profileMode")], "IPCamCameraProfile", dayNight, "Mode", "valueStr");
+	            } else {
+	                cameraProfileHx.setNodeValue(arrayNightModeCGIOption[getIdValue("sel_profileMode")], "IPCamCameraProfile", dayNight, "Mode", "valueStr");
+	            }   
+	            //alert("ProfileMode111");
+	            break;
+	        case "ProfileFlicker":
+	            //setIdDisplay("tr_profileFlicker", "table-row");
+	            //alert("ProfileFlicker000");
+	            cameraProfileHx.setNodeValue(getIdChecked("chk_profileFlicker"), "IPCamCameraProfile", dayNight, "Flicker", "value");
+	            //alert("ProfileFlicker111");
+	            break;
+	        case "ExposureSetting"://存三種
+	            //setIdDisplay("tr_exposureSetting", "table-row");
+	            //alert("ExposureSetting000");
+	            cameraProfileHx.setNodeValue(getIdValue("sel_exposureMode"), "IPCamCameraProfile", dayNight, "Exposure", "ExposureMode", "value");
+	            if (dayNight == "DayProfile") {
+	                cameraProfileHx.setNodeValue(arrayDayAEModeCGIOption[getIdValue("sel_exposureMode")], "IPCamCameraProfile", dayNight, "Exposure", "ExposureMode", "valueStr");
+	            } else {
+	                cameraProfileHx.setNodeValue(arrayNightAEModeCGIOption[getIdValue("sel_exposureMode")], "IPCamCameraProfile", dayNight, "Exposure", "ExposureMode", "valueStr");
+	            }
+	            //alert("ExposureSetting111");
+	            cameraProfileHx.setNodeValue(getIdValue("sel_exposureShutter"), "IPCamCameraProfile", dayNight, "Exposure", "Shutter", "value");
+	            if (dayNight == "DayProfile") {
+	                cameraProfileHx.setNodeValue(arrayDayAEShutterCGIOption[getIdValue("sel_exposureShutter")], "IPCamCameraProfile", dayNight, "Exposure", "Shutter", "valueStr");
+	            } else {
+	                cameraProfileHx.setNodeValue(arrayNightAEShutterCGIOption[getIdValue("sel_exposureShutter")], "IPCamCameraProfile", dayNight, "Exposure", "Shutter", "valueStr");
+	            }
+	            //alert("ExposureSetting333");
+	            cameraProfileHx.setNodeValue(getIdValue("sel_exposureFlickerness"), "IPCamCameraProfile", dayNight, "Exposure", "Flickerless", "value");
+	            if (dayNight == "DayProfile") {
+	                cameraProfileHx.setNodeValue(arrayDayAEFlickCGIOption[getIdValue("sel_exposureFlickerness")], "IPCamCameraProfile", dayNight, "Exposure", "Flickerless", "valueStr");
+	            } else {
+	                cameraProfileHx.setNodeValue(arrayNightAEFlickCGIOption[getIdValue("sel_exposureFlickerness")], "IPCamCameraProfile", dayNight, "Exposure", "Flickerless", "valueStr");
+	            }
+	            //alert("ExposureSetting444");
+	            break;
+	        case "DeviceTitle":
+	        	hx.setNodeValue(getIdValue("txt_device_title"), str, "title");
+	        	break;
+	        case "RecordDualStream":
+	        	hx.setNodeValue(getIdValue("sel_record_dual_stream"), str, "recordDual");
+	        	break;
+	        case "RecordMode":
+	        	hx.setNodeValue(getIdValue("sel_record_mode"), str, "recordMode");
+	        	break;
+	        case "Ratio":
+	        	hx.setNodeValue(getIdValue("sel_ratio"), str, "ratio");
+	        	break;
+            case "#text":   //******* for chrome
+                funcNum++;
+                break;
+	    }
+	}
+}
+function SetXML() {
+
+    //var str = "Camera" + getIdSelectText("sel_channel_num");
+    var type = hybridHx.getNodeValue("Camera" + getIdSelectText("sel_channel_num"),"type");
+    if (type == "Analog") {
+        syncDataAnalog();
+
+        var hx2 = new HandleXml();
+        var newxml;
+
+        if (window.ActiveXObject) {
+            newxml = hybridHx.getXml().xml.replace(/\t/g, "");
+        }
+        else {
+            newxml = (new XMLSerializer()).serializeToString(hybridHx.getXml()).replace(/\t/g, "");
+        }
+
+        //if (parent.g_ifIE == true) {
+        //    newxml = hybridHx.getXml().xml.replace(/\t/g, "");
+        //} else {
+        //    newxml = (new XMLSerializer()).serializeToString(hybridHx.getXml()).replace(/\t/g, "");
+        //}
+        //var newxml = hx.getXml().xml.replace(/\t/g, "");
+        //alert("newxml = " + newxml);
+        ajax.postData("../cgi-bin/HybridCamera.xml", newxml);
+        hx2.setXml(ajax.data);
+
+        if (hx2.getNodeValue("result") == "1") {
+            alert(hl.get("SUCCESS"));
+        } else {
+            alert(hl.get("FAIL"));
+        }
+
+    } else if (type == "IPCam") {
+        syncData();
+        //alert("GG0");
+        var hx2 = new HandleXml();
+        var newxml;
+        if (window.ActiveXObject) {
+            newxml = hx.getXml().xml.replace(/\t/g, "");
+        }
+        else {
+            newxml = (new XMLSerializer()).serializeToString(hx.getXml()).replace(/\t/g, "");
+        }
+
+        //if (parent.g_ifIE == true) {
+        //    newxml = hx.getXml().xml.replace(/\t/g, "");
+        //} else {
+        //    newxml = (new XMLSerializer()).serializeToString(hx.getXml()).replace(/\t/g, "");
+        //}
+        //var newxml = hx.getXml().xml.replace(/\t/g, "");
+        //alert("newxml = " + newxml);
+        ajax.postData("../cgi-bin/IPCam.xml", newxml);
+        hx2.setXml(ajax.data);
+
+
+        //var str = "camera" + getIdSelectText("sel_channel_num");
+        //"../cgi-bin/IPCamCameraProfile.xml?" + "ip=" + hx.getNodeValue(str, "ipAddress") + "&HttpPort=" + hx.getNodeValue(str, "httpPort") + "&username=" +
+        //hx.getNodeValue(str, "username") + "&password=" + hx.getNodeValue(str, "password")
+        //alert("newxml = " + newxml);
+        var hx3 = new HandleXml();
+        var newxml2;
+
+
+        if (window.ActiveXObject) {
+            newxml2 = cameraProfileHx.getXml().xml.replace(/\t/g, "");
+        }
+        else {
+            newxml2 = (new XMLSerializer()).serializeToString(hx.getXml()).replace(/\t/g, "");
+        }
+
+        //if (parent.g_ifIE == true) {
+        //    newxml2 = cameraProfileHx.getXml().xml.replace(/\t/g, "");
+        //} else {
+        //    newxml2 = (new XMLSerializer()).serializeToString(cameraProfileHx.getXml()).replace(/\t/g, "");
+        //}
+        //alert("newxml2 = " + newxml2);
+        ajax2.postData("../cgi-bin/IPCamCameraProfile.xml", newxml2);
+        //alert("44444");
+        hx3.setXml(ajax2.data);
+
+
+        //alert("hx3 = " + hx3);
+        if (hx2.getNodeValue("result") == "1") {
+            alert(hl.get("SUCCESS"));
+        } else {
+            alert(hl.get("FAIL"));
+        }
+
+        setTimeout('parent.setNVRMaskValue()', 1000);
+    } else {
+        alert("This channel is disconnected");
+    }
+    
+}
+function applyToAll(){
+	syncData();
+	var fromNode = "camera" + getIdSelectText("sel_channel_num");
+	var toNode = "";
+	for(var i = 0;i < mc_apply.aryChecked.length;i++){
+		if(mc_apply.aryChecked[i]){
+		    toNode = "camera" + (i + 1);
+		    hx.setNodeValue(1, toNode, "modified");
+		    if (setHx.getNode("EVIDEOADJUST", "Brightness"))
+			    hx.setNodeValue(hx.getNodeValue(fromNode, "brightnessLevel"), toNode, "brightnessLevel");
+		    if (setHx.getNode("EVIDEOADJUST", "Contrast"))
+				hx.setNodeValue(hx.getNodeValue(fromNode, "contrastLevel"), toNode, "contrastLevel");
+		    if (setHx.getNode("EVIDEOADJUST", "Color"))
+		        hx.setNodeValue(hx.getNodeValue(fromNode, "saturationLevel"), toNode, "saturationLevel");
+		    if (setHx.getNode("EVIDEOADJUST", "Sharpness"))
+		        hx.setNodeValue(hx.getNodeValue(fromNode, "sharpnessLevel"), toNode, "sharpnessLevel");
+            if (setHx.getNode("EVIDEOADJUST", "MaskChennel"))
+                hx.setNodeValue(hx.getNodeValue(fromNode, "maskChannel"), toNode, "maskChannel");
+            if (setHx.getNode("EVIDEOADJUST", "ConnectedChannel"))
+                hx.setNodeValue(hx.getNodeValue(fromNode, "connectChannel"), toNode, "connectChannel");
+		}
+	}
+	SetXML();
+	closeApplyEdit();
+}
+function closeApplyEdit(){
+	//parent.resetViewFrm(1,400,300,190,570);
+    //sm.close();
+    setIdVisibility("mask1", 0);
+    mc_apply.close();
+    parent.ChangAppletPosition(480, 360, 220, 330);
+}
+function openApplyEdit(){
+
+	//parent.resetViewFrm(0,0,0,0,0);
+	mc_apply.setAry(g_cam_ary);
+	mc_apply.setCols(4)
+		.setSelectedText(getIdValue("sel_channel_num").toInt() + 1)
+		.createList()
+		.setFuncOk(applyToAll)
+		.setFuncCancel(closeApplyEdit);
+	//sm.open();
+	setIdVisibility("mask1", 1);
+	mc_apply.open();
+	parent.ChangAppletPosition(0, 0, 220, 330);
+}
+function PauseApplet() {
+    parent.applet.appletPause();
+    parent.applet.style.width = 0 + "px";
+    parent.applet.style.height = 0 + "px";
+}
+
+
+function CreateSlideBar() { //** create jQuery slide bar
+    $("#slider1").slider({
+        max: 100,
+        min: 0,
+        range: "min",
+        orientation: "horizontal",
+        value: getIdValue("txt1"),
+        change: function (event, ui) {
+            //alert($( "#slider" ).slider( "value" ));
+            //document.getElementById("txt1").value = $("#slider1").slider("value");
+            setIdValue("txt1", $("#slider1").slider("value"));
+        },
+        slide: function (event, ui) {
+            setIdValue("txt1", ui.value);
+        }
+    });
+
+    $("#slider2").slider({
+        max: 100,
+        min: 0,
+        range: "min",
+        orientation: "horizontal",
+        value: getIdValue("txt2"),
+        change: function (event, ui) {
+            setIdValue("txt2", $("#slider2").slider("value"));
+        },
+        slide: function (event, ui) {
+            setIdValue("txt2", ui.value);
+        }
+    });
+
+    $("#slider3").slider({
+        max: 100,
+        min: 0,
+        range: "min",
+        orientation: "horizontal",
+        value: getIdValue("txt3"),
+        change: function (event, ui) {
+            setIdValue("txt3", $("#slider3").slider("value"));
+        },
+        slide: function (event, ui) {
+            setIdValue("txt3", ui.value);
+        }
+    });
+
+    $("#slider4").slider({
+        max: 100,
+        min: 0,
+        range: "min",
+        orientation: "horizontal",
+        value: getIdValue("txt4"),
+        change: function (event, ui) {
+            setIdValue("txt4", $("#slider4").slider("value"));
+        },
+        slide: function (event, ui) {
+            setIdValue("txt4", ui.value);
+        }
+    });
+}
+function setSliderValue(no) {
+    $("#slider"+no).slider("option", "value", EFDEF_id("txt"+no).value);
+}
+function setAppletDivDisplay(flag) {
+    if (flag == 1) {
+        EFDEF_id("appletDiv").style.width = "1247px";
+        EFDEF_id("appletDiv").style.height = "532px";
+        EFDEF_id("appletDiv").style.overflow = "hidden";
+    }
+    else {
+        EFDEF_id("appletDiv").style.width = "0px";
+        EFDEF_id("appletDiv").style.height = "0px";
+        EFDEF_id("appletDiv").style.overflow = "hidden";
+    }
+}
+function GetDeviceXML() {
+    devicehx.setUrl("../IPDevice.xml");
+    var lenght = devicehx.getItemSize("HallWay");
+    for (cnt = 0; cnt < lenght; cnt++) {
+        HallWay_Device_Ary.push(devicehx.getItemValue(cnt, "HallWay"));
+    }
+}
+function checkHallway() {
+    //var cam = "camera" + getIdValue("sel_channel_num");
+    var cam = "camera" + getIdSelectText("sel_channel_num").toInt();
+    var device = hx.getNodeValue(cam, "model");
+    var ch_idx_now = getIdValue("sel_channel_num").toInt();
+    for (cnt = 0; cnt < HallWay_Device_Ary.length; cnt++) {
+        if (device == HallWay_Device_Ary[cnt]) {
+            setIdDisplay("tr_Hallway", "table-row");
+            var hallArray = new Array(parent.g_total_ch_num);
+            for (var i = 0; i < hallArray.length; i++) {
+                if (i == ch_idx_now) {
+                    hallArray[i] = parseInt(hx.getNodeValue(cam, "hallwayMode"));
+                } else {
+                    hallArray[i] = 0;
+                }
+            }
+            parent.setViewRotateAngle(hallArray);
+        }
+    }
+
+}
+function initHallwayImage() {
+    EFDEF_("hallway_left")
+        .onmousedown(function () {
+
+        })
+        .onmouseup(function () {
+
+        })
+        .onmouseover(function () {
+            setIdCursor(this, "pointer");
+            setIdSrc("img_hallway", "../img/IPcamPtz/turnleftover.png");
+        })
+	    .onmouseout(function () {
+	        setIdSrc("img_hallway", "../img/IPcamPtz/turn.png");
+	    })
+        .onclick(function () {
+            var cam = "camera" + getIdSelectText("sel_channel_num").toInt();
+            var hallArray = new Array(parent.g_total_ch_num);
+            var ch_idx_now = getIdValue("sel_channel_num").toInt();
+
+            var ch_angle_now = parseInt(hx.getNodeValue(cam, "hallwayMode"));
+            var ch_angle_result;
+            if (ch_angle_now == 270) {
+                ch_angle_result = 0;
+            } else {
+                ch_angle_result = ch_angle_now + 90;
+            }
+            for (var i = 0; i < hallArray.length; i++) {
+                if (i == ch_idx_now) {
+                    hallArray[i] = ch_angle_result;
+                } else {
+                    hallArray[i] = 0;
+                }
+            }
+            hx.setNodeValue(ch_angle_result, cam, "hallwayMode");
+            parent.setViewRotateAngle(hallArray);
+        });
+
+    EFDEF_("hallway_right")
+        .onmousedown(function () {
+
+        })
+        .onmouseup(function () {
+
+        })
+        .onmouseover(function () {
+            setIdCursor(this, "pointer");
+            setIdSrc("img_hallway", "../img/IPcamPtz/turnrightover.png");
+        })
+	    .onmouseout(function () {
+	        setIdSrc("img_hallway", "../img/IPcamPtz/turn.png");
+	    })
+        .onclick(function () {
+            var cam = "camera" + getIdSelectText("sel_channel_num").toInt();
+            var hallArray = new Array(parent.g_total_ch_num);
+            var ch_idx_now = getIdValue("sel_channel_num").toInt();
+
+            var ch_angle_now = parseInt(hx.getNodeValue(cam, "hallwayMode"));
+            var ch_angle_result;
+            if (ch_angle_now == 0) {
+                ch_angle_result = 270;
+            } else {
+                ch_angle_result = ch_angle_now - 90;
+            }
+            for (var i = 0; i < hallArray.length; i++) {
+                if (i == ch_idx_now) {
+                    hallArray[i] = ch_angle_result;
+                } else {
+                    hallArray[i] = 0;
+                }
+            }
+            hx.setNodeValue(ch_angle_result, cam, "hallwayMode");
+            parent.setViewRotateAngle(hallArray);
+        });
+}
+</script>
+</head>
+<body onload="" onunload="parent.g_setpopup = 1;parent.SetAppletVisible(0)">
+	<div class="ClientFrame">
+        <div id="divResize"  style="position:absolute; top:390px; width:400px;">
+            <table border="0" cellspacing="5" cellpadding="0">
+                <tr>
+                    <td id="td_Brightness" style="width:120px;"></td>
+                    <td>
+                        <input type="text" id="txt1" size="4" maxlength="3" style="width:40px;" onblur="CheckCharKeyin(this,0,0,255);" onkeyup="setSliderValue('1');" />
+                    </td>
+                    <td style="width: 150px"><div id="slider1" style="z-index: 90"></div></td>
+                </tr>
+                <tr>
+                    <td id="td_Contrast"></td>
+                    <td>
+                        <input type="text" id="txt2" size="4" maxlength="3" style="width:40px;" onblur="CheckCharKeyin(this,0,0,255);" onkeyup="setSliderValue('2');" />
+                    </td>
+                    <td style="width: 150px"><div id="slider2" style="z-index: 90"></div></td>
+                </tr>
+                <tr>
+                    <td id="td_Color"></td>
+                    <td>
+                        <input type="text" id="txt3" size="4" maxlength="3" style="width:40px;" onblur="CheckCharKeyin(this,0,0,255);" onkeyup="setSliderValue('3');" />
+                    </td>
+                    <td style="width: 180px"><div id="slider3" style="z-index: 90"></div></td>
+                </tr>
+                <tr>
+                    <td id="td_Sharpness">Sharpness</td>
+                    <td>
+                        <input type="text" id="txt4" size="4" maxlength="3" style="width:40px;" onblur="CheckCharKeyin(this,0,0,255);" onkeyup="setSliderValue('4');" />
+                    </td>
+                    <td style="width: 180px"><div id="slider4" style="z-index: 90"></div></td>
+                </tr>
+
+            </table>
+        </div>
+        <div id="div_camera_setting" style="position:absolute; left:450px; width: 350px;">
+                        <table>
+                            <tr>
+                                <td id="td_channel_num" class="txtLeft" style="height:30px">Channel Number</td>
+                                <td><select id="sel_channel_num" style="width:50px" onchange="selectCamera();"></select></td>
+                            </tr>
+                            <tr id="tr_TitleDualMode">
+                                <td colspan="2">
+                                	<table>
+                                		<tr id="trDecieTitle">
+			                                <td id="td_title" class="txtLeft" style="height:30px">Device Title</td>
+			                                <td><input type="text" id="txt_device_title" style="width:130px;background-color: #696969;color: #FFFFFF;"/></td>
+			                            </tr>
+			                            <tr id="trRecordDual">
+			                                <td id="td_record_dual_stream" class="txtLeft" style="height:30px">Record Dual Stream</td>
+			                                <td><select id="sel_record_dual_stream" style="width:100px"></select></td>
+			                            </tr>
+			                            <tr id="trRecordMode">
+			                                <td id="td_record_mode" class="txtLeft" style="height:30px">Record Mode</td>
+			                                <td><select id="sel_record_mode" style="width:120px"></select></td>
+			                            </tr>
+			                            <tr id="tr_ratio">
+			                                <td id="td_ratio" class="txtLeft" style="height:30px">Ratio</td>
+			                                <td><select id="sel_ratio"></select></td>
+			                            </tr>
+                                	</table>
+                                </td>
+                            </tr>
+                            
+                            <tr id="tr_channel">
+                                <td colspan="2">
+                                    <table>
+                                        <tr>
+                                            <td style="height:30px; width:30px;"><input type="checkbox" id="chk_connected_channel"/></td>
+                                            <td id="td_connected_channel" class="txtLeft">Connected Channel</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="height:30px;width:30px;"><input type="checkbox" id="chk_mask_channel"/></td>
+                                            <td id="td_mask_channel" class="txtLeft">Mask Channel</td>                
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <tr id="tr_Hallway" style="display:none">
+                                <td id="td_hallway_mode" class="txtLeft" style="height:30px">Hollway Mode</td>
+                                <td><img src="../img/IPcamPtz/turn.png" id="img_hallway" usemap="#hallwaymap" alt=""  border="0"/>
+                                      <map id="hallwaymap" name="hallwaymap">
+                                          <area id="hallway_right" shape="poly" coords="1,15, 5,0, 33,0, 33,31, 5,31, 1,15" alt="right" />
+                                          <area id="hallway_left" shape="poly" coords="34,0, 62,0, 67,15, 62,31, 34,31, 34,0"  alt="left"/>
+                                      </map>
+                                </td>
+                            </tr>
+
+                            <tr id="tr_profileSetting" style="display:none">
+                                <td id="td_profileSetting" class="txtLeft" style="height:30px">Profile Setting</td>
+                                <td><select id="sel_profileSetting" style="width:100px" onchange="selectProfileSetting()"></select></td>
+                            </tr>
+
+                            <tr id="tr_profileMode" style="display:none">
+                                <td id="td_profileMode" class="txtLeft" style="height:30px">Profile Mode</td>
+                                <td><select id="sel_profileMode" style="width:100px" onchange="selectProfileMode()"></select></td>
+                            </tr>
+
+                            <tr id="tr_profileFlicker" style="display:none">
+                                <td colspan="2">
+                                    <table>
+                                        <tr>
+                                            <td style="height:30px;width:30px;"><input type="checkbox" id="chk_profileFlicker" /></td>
+                                            <td id="td_profileFlicker" class="txtLeft">Flicker</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <tr id="tr_exposureSetting" style="display:none">
+                                <td colspan="4" width="530">
+                                    <fieldset class="fieldsetStyle">
+                                        <legend id="legend_exposureSetting" class="legStyle">Exposure Settings </legend>
+                                        <table id="tbl_exposureSetting" border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td id="td_exposureMode" class="txtLeft" style="height:30px">Mode:</td>
+                                                <td><select id="sel_exposureMode" style="width:130px" onchange="selectExposureMode()"></select></td>
+                                            </tr>
+                                            <tr>
+                                                <td id="td_exposureShutter" class="txtLeft" style="height:30px">Shutter:</td>
+                                                <td><select id="sel_exposureShutter" style="width:130px"></select></td>
+                                            </tr>
+                                            <tr>
+                                                <td id="td_exposureFlickerness" class="txtLeft" style="height:30px">Flickerness:</td>
+                                                <td><select id="sel_exposureFlickerness" style="width:130px"></select></td>
+                                            </tr>
+
+                                        </table>
+                                    </fieldset>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+    </div>
+
+	<div class="applyFrm">
+		<input type="button" id="btn_Apply_To" class="btnStyle" value="" style="width:120px;" onclick="openApplyEdit();" />
+        <br />
+        <br />
+		<input type="button" id="btn_save" class="btnStyle" value="" style="width:120px;" onclick="SetXML();" />
+	</div>
+	<div id="sm"></div>
+	<div id="mc_apply" style="z-index:121;"></div>
+    <div id="mask1" class="ScreenMask"></div>
+
+
+
+    <style>
+        .resize-triggers {
+            visibility: hidden;
+        }
+
+            .resize-triggers, .resize-triggers > div, .contract-trigger:before {
+                content: " ";
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+            }
+
+                .resize-triggers > div {
+                    background: #eee;
+                    overflow: auto;
+                }
+
+        .contract-trigger:before {
+            width: 200%;
+            height: 200%;
+        }
+    </style>
+
+    <script src="../include/js/jquery-1.8.2.js"></script>
+    <script src="../include/js/jquery-ui.js"></script>
+    <script src="../include/js/detect-zoom.js"></script>
+    <script>
+        function refresh() {
+            var width, height, ratio;
+            ratio = window.detectZoom.zoom();
+            if (ratio == 0) {
+                ratio = 1;
+            }
+            width = 480 * ratio;
+            height = 360 * ratio;
+            parent.applet.resize(width, height);
+            parent.applet.setUILayout(width, height, 1);
+            //parent.applet.setSingleChannelScreen(0);
+            //parent.applet.setSingleChannelScreen(getIdValue("sel_channel_num") -1);
+        }
+        $(document).ready(function () {
+            init();
+            //applet.setUILayout(appletWidth, appletHeight, 16);
+            //$(window).on('resize', refresh);
+        });
+
+        (function () {
+
+            var attachEvent = document.attachEvent;
+
+            //alert("attachEvent = " + attachEvent);
+
+            if (!attachEvent) {
+                var requestFrame = (function () {
+                    var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
+                              function (fn) { return window.setTimeout(fn, 20); };
+                    return function (fn) { return raf(fn); };
+                })();
+
+                var cancelFrame = (function () {
+                    var cancel = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame ||
+                                 window.clearTimeout;
+                    return function (id) { return cancel(id); };
+                })();
+
+                function resetTriggers(element) {
+                    var triggers = element.__resizeTriggers__,
+                        expand = triggers.firstElementChild,
+                        contract = triggers.lastElementChild,
+                        expandChild = expand.firstElementChild;
+                    contract.scrollLeft = contract.scrollWidth;
+                    contract.scrollTop = contract.scrollHeight;
+                    expandChild.style.width = expand.offsetWidth + 1 + 'px';
+                    expandChild.style.height = expand.offsetHeight + 1 + 'px';
+                    expand.scrollLeft = expand.scrollWidth;
+                    expand.scrollTop = expand.scrollHeight;
+                };
+
+                function checkTriggers(element) {
+                    //return element.offsetWidth != element.__resizeLast__.width ||
+                    //       element.offsetHeight != element.__resizeLast__.height;
+                    return true;
+                }
+
+                function scrollListener(e) {
+                    var element = this;
+                    resetTriggers(this);
+                    if (this.__resizeRAF__) cancelFrame(this.__resizeRAF__);
+                    this.__resizeRAF__ = requestFrame(function () {
+                        if (checkTriggers(element)) {
+                            element.__resizeLast__.width = element.offsetWidth;
+                            element.__resizeLast__.height = element.offsetHeight;
+                            element.__resizeListeners__.forEach(function (fn) {
+                                fn.call(element, e);
+                            });
+                        }
+                    });
+                };
+            }
+
+            window.addResizeListener = function (element, fn) {
+                //alert("attachEvent = " + attachEvent);
+                if (attachEvent) element.attachEvent('resize', fn);
+                else {
+                    if (!element.__resizeTriggers__) {
+                        if (getComputedStyle(element).position == 'static') element.style.position = 'relative';
+                        element.__resizeLast__ = {};
+                        element.__resizeListeners__ = [];
+                        (element.__resizeTriggers__ = document.createElement('div')).className = 'resize-triggers';
+                        element.__resizeTriggers__.innerHTML = '<div class="expand-trigger"><div></div></div>' +
+                                                               '<div class="contract-trigger"></div>';
+                        element.appendChild(element.__resizeTriggers__);
+                        resetTriggers(element);
+                        element.addEventListener('scroll', scrollListener, true);
+                    }
+                    element.__resizeListeners__.push(fn);
+                }
+            };
+
+            window.removeResizeListener = function (element, fn) {
+                if (attachEvent) element.detachEvent('resize', fn);
+                else {
+                    element.__resizeListeners__.splice(element.__resizeListeners__.indexOf(fn), 1);
+                    if (!element.__resizeListeners__.length) {
+                        element.removeEventListener('scroll', scrollListener);
+                        element.__resizeTriggers__ = !element.removeChild(element.__resizeTriggers__);
+                    }
+                }
+            }
+
+        })();
+
+        var test22 = document.getElementById('divResize');
+
+        addResizeListener(test22, function (e) {
+            //console.log(e);
+            //alert("ggg");
+            refresh();
+            //time.innerHTML = Math.round(new Date().getTime() / 1000) + ' seconds from the epoch'
+        });
+
+    </script>
+</body>
+</html>

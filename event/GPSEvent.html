@@ -1,0 +1,658 @@
+﻿<!DOCTYPE html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Pragma" content="no-store, no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="cache-control" content="no-store, no-cache, must-revalidate">
+<link rel="stylesheet" type="text/css" href="../include/css/style.css">
+<script type="text/javascript" src="../include/js/utility.js"></script>
+<script type="text/javascript" src="../include/js/AjaxClass.js"></script>
+<script type="text/javascript" src="../include/js/HandleXml.js"></script>
+<script type="text/javascript">
+var hl = parent.hl;
+var ajax = new AjaxClass();
+var hx = new HandleXml();
+var setHx = new HandleXml();
+var callScreenModeFlag = 0;
+
+function init(){
+	setLanguage();
+	setHx.setUrl("../" + parent.g_device_xml_name);
+	GetXML();
+	initFunc();
+	chgOutputType();
+	chgGPSBorderType();
+	chgCoordinateExpress();
+}
+
+function initFunc() {
+    var funcNum = 0;
+    var Cnt = 0;
+    var i = 0;
+    var str = "DateTime";
+    EFDEF_("^td_").className("txtLeft");
+
+    funcNum = setHx.getNodeChildSize("GPSEVENT");
+    for (Cnt = 0; Cnt < funcNum; Cnt++) {
+
+        switch (setHx.getNodeChildName("GPSEVENT", Cnt)) {
+            case "EmailNotify":
+                setIdDisplay("td_EmailNotify", "table-cell");
+                setIdDisplay("td_EventAction", "table-cell");
+                setIdDisplay("chk_EmailNotify", "inline");
+                //setIdInnerHTML("td_EmailNotify", "");
+                setIdChecked("chk_EmailNotify", hx.getNodeValue("GPSEvent", "emailNotify"));
+                break;
+            case "NetworkAlarm":
+                setIdDisplay("td_NetworkAlarm", "table-cell");
+                setIdDisplay("chk_NetworkAlarm", "inline");
+                //setIdInnerHTML("td_NetworkAlarm", "");
+                setIdChecked("chk_NetworkAlarm", hx.getNodeValue("GPSEvent", "networkAlarm"));
+                break;
+            case "AlarmOutput":
+                setIdDisplay("td_AlarmOutput", "table-cell");
+                setIdDisplay("sel_AlarmOutput", "inline");
+                parent.setSelectOutput(EFDEF_id("sel_AlarmOutput"), parent.g_OutputSum);
+                setIdValue("sel_AlarmOutput", hx.getNodeValue("GPSEvent", "alarmOutput"));
+                break;
+            case "OutputType":
+                setIdDisplay("td_OutputType", "table-cell");
+                setIdDisplay("sel_OutputType", "inline");
+                
+                var type = parent.SetHx.getNodeValue("EventSetting", "GPSAlarmType").split(",");
+                var hs = new HandleSelect("sel_OutputType", 0);
+                var tArray = parent.transLangArray(type);
+                for (i = 0; i < type.length; i++) {
+                    hs.addOpt(i, hl.get(tArray[i]), type[i].toLowerCase());
+                }
+                setIdValue("sel_OutputType", hx.getNodeValue("GPSEvent", "alarmOutputType"));
+                setIdValue("txt_TimeoutDuration", hx.getNodeValue("GPSEvent", "timeoutDuration"));
+                break;
+            case "GPSSpeed":
+            	setIdDisplay("td_Speed", "table-cell");
+                setIdDisplay("td_GPSSpeed", "table-cell");
+                setIdDisplay("sel_GPSSpeed", "inline");
+                var hs = new HandleSelect("sel_GPSSpeed", 0);
+                var stamp = parent.SetHx.getNodeValue("EventSetting", "GPSSpeedOnOff").split(",");
+                for (i = 0; i < stamp.length; i++) {
+                    hs.addOpt(i, stamp[i], i);
+                }
+                setIdValue("sel_GPSSpeed", hx.getNodeValue("GPSEvent", "speed"));
+                //setIdInnerHTML("td_Speed", "");
+                //setIdInnerHTML("td_GPSSpeed", "");
+                break;
+            case "SpeedHigherLimit":
+                setIdDisplay("td_SpeedHigherLimit", "table-cell");
+                setIdDisplay("txt_SpeedHigherLimit", "inline");
+                //setIdInnerHTML("td_SpeedHigherLimit", "");
+                setIdValue("txt_SpeedHigherLimit", hx.getNodeValue("GPSEvent", "highterLimit"));
+                break;
+            case "SpeedUnit":
+                setIdDisplay("td_SpeedUnit", "table-cell");
+                setIdDisplay("sel_SpeedUnit", "inline");
+                
+                var hs = new HandleSelect("sel_SpeedUnit", 0);
+                var stamp = parent.SetHx.getNodeValue("EventSetting", "GPSSpeedUnit").split(",");
+                for (i = 0; i < stamp.length; i++) {
+                    hs.addOpt(i, stamp[i], i);
+                }
+                setIdValue("sel_SpeedUnit", hx.getNodeValue("GPSEvent", "dispUint"));
+                //setIdInnerHTML("td_SpeedUnit", "");
+                //setIdChecked("chk_Playbackstatus", hx.getNodeValue("MainMonitor", "showPbStatus"));
+                break;
+            case "GPSAlarm":
+                setIdDisplay("td_Fencing", "table-cell");
+                setIdDisplay("td_GPSAlarm", "table-cell");
+                setIdDisplay("sel_GPSAlarm", "inline");
+                var hs = new HandleSelect("sel_GPSAlarm", 0);
+                var stamp = parent.SetHx.getNodeValue("EventSetting", "GPSFencingOnOff").split(",");
+                for (i = 0; i < stamp.length; i++) {
+                    hs.addOpt(i, stamp[i], i);
+                }
+                setIdValue("sel_GPSAlarm", hx.getNodeValue("GPSEvent", "alarm"));
+                //setIdInnerHTML("td_Fencing", "");
+                //setIdInnerHTML("td_GPSAlarm", "");
+                break;
+            case "GPSBorderType":
+                setIdDisplay("td_GPSBorderType", "table-cell");
+                setIdDisplay("sel_GPSBorderType", "inline");
+                var hs = new HandleSelect("sel_GPSBorderType", 0);
+                var stamp = parent.SetHx.getNodeValue("EventSetting", "GPSBorderType").split(",");
+                for (i = 0; i < stamp.length; i++) {
+                    hs.addOpt(i, stamp[i], i);
+                }
+                setIdValue("sel_GPSBorderType", hx.getNodeValue("GPSEvent", "borderType"));
+                //setIdInnerHTML("td_GPSBorderType", "");
+                break;
+            case "CoordinateExpress":
+                setIdDisplay("td_CoordinateExpress", "table-cell");
+                setIdDisplay("sel_CoordinateExpress", "inline");
+                var hs = new HandleSelect("sel_CoordinateExpress", 0);
+                var stamp = parent.SetHx.getNodeValue("EventSetting", "GPSCorrdinate").split(",");
+                for (i = 0; i < stamp.length; i++) {
+                    hs.addOpt(i, stamp[i], i);
+                }
+                setIdValue("sel_CoordinateExpress", hx.getNodeValue("GPSEvent", "gpsFormat"));
+                //setIdInnerHTML("td_CoordinateExpress", "");
+                
+                
+                var hs = new HandleSelect("sel_CenterLat", 0);
+                hs.addOpt(0, "S", 0);
+                hs.addOpt(1, "N", 1);
+                setIdValue("sel_CenterLat", hx.getNodeValue("GPSEvent", "centerLatDir"));
+                setIdValue("txt_CenterLat01", hx.getNodeValue("GPSEvent", "centerLat"));
+                setIdValue("txt_CenterLat02", hx.getNodeValue("GPSEvent", "centerLatMin"));
+                setIdValue("txt_CenterLat03", hx.getNodeValue("GPSEvent", "centerLatSec"));
+                setIdValue("txt_CenterLatDec", hx.getNodeValue("GPSEvent", "centerLatDec"));
+                
+                var hs = new HandleSelect("sel_CenterLon", 0);
+                hs.addOpt(0, "E", 0);
+                hs.addOpt(1, "W", 1);
+                setIdValue("sel_CenterLon", hx.getNodeValue("GPSEvent", "centerLonDir"));
+                setIdValue("txt_CenterLon01", hx.getNodeValue("GPSEvent", "centerLon"));
+                setIdValue("txt_CenterLon02", hx.getNodeValue("GPSEvent", "centerLonMin"));
+                setIdValue("txt_CenterLon03", hx.getNodeValue("GPSEvent", "centerLonSec"));
+                setIdValue("txt_CenterLonDec", hx.getNodeValue("GPSEvent", "centerLonDec"));
+                
+                var hs = new HandleSelect("sel_Radius", 0);
+                hs.addOpt(0, "Km", 0);
+                hs.addOpt(1, "Mi", 1);
+                setIdValue("sel_Radius", hx.getNodeValue("GPSEvent", "radiusUnit"));
+                setIdValue("txt_Radius", hx.getNodeValue("GPSEvent", "radius"));
+                
+                
+                
+                var hs = new HandleSelect("sel_UpperLeftLat", 0);
+                hs.addOpt(0, "S", 0);
+                hs.addOpt(1, "N", 1);
+                setIdValue("sel_UpperLeftLat", hx.getNodeValue("GPSEvent", "upLeftLatDir"));
+                setIdValue("txt_UpperLeftLat01", hx.getNodeValue("GPSEvent", "upLeftLat"));
+                setIdValue("txt_UpperLeftLat02", hx.getNodeValue("GPSEvent", "upLeftLatMin"));
+                setIdValue("txt_UpperLeftLat03", hx.getNodeValue("GPSEvent", "upLeftLatSec"));
+                setIdValue("txt_UpperLeftLatDec", hx.getNodeValue("GPSEvent", "upLeftLatDec"));
+                
+                var hs = new HandleSelect("sel_UpperLeftLon", 0);
+                hs.addOpt(0, "E", 0);
+                hs.addOpt(1, "W", 1);
+                setIdValue("sel_UpperLeftLon", hx.getNodeValue("GPSEvent", "upLeftLonDir"));
+                setIdValue("txt_UpperLeftLon01", hx.getNodeValue("GPSEvent", "upLeftLon"));
+                setIdValue("txt_UpperLeftLon02", hx.getNodeValue("GPSEvent", "upLeftLonMin"));
+                setIdValue("txt_UpperLeftLon03", hx.getNodeValue("GPSEvent", "upLeftLonSec"));
+                setIdValue("txt_UpperLeftLonDec", hx.getNodeValue("GPSEvent", "upLeftLonDec"));
+                
+                var hs = new HandleSelect("sel_LowerRightLat", 0);
+                hs.addOpt(0, "S", 0);
+                hs.addOpt(1, "N", 1);
+                setIdValue("sel_LowerRightLat", hx.getNodeValue("GPSEvent", "loRightLatDir"));
+                setIdValue("txt_LowerRightLat01", hx.getNodeValue("GPSEvent", "loRightLat"));
+                setIdValue("txt_LowerRightLat02", hx.getNodeValue("GPSEvent", "loRightLatMin"));
+                setIdValue("txt_LowerRightLat03", hx.getNodeValue("GPSEvent", "loRightLatSec"));
+                setIdValue("txt_LowerRightLatDec", hx.getNodeValue("GPSEvent", "loRightLatDec"));
+                
+                var hs = new HandleSelect("sel_LowerRightLon", 0);
+                hs.addOpt(0, "E", 0);
+                hs.addOpt(1, "W", 1);
+                setIdValue("sel_LowerRightLon", hx.getNodeValue("GPSEvent", "loRightLonDir"));
+                setIdValue("txt_LowerRightLon01", hx.getNodeValue("GPSEvent", "loRightLon"));
+                setIdValue("txt_LowerRightLon02", hx.getNodeValue("GPSEvent", "loRightLonMin"));
+                setIdValue("txt_LowerRightLon03", hx.getNodeValue("GPSEvent", "loRightLonSec"));
+                setIdValue("txt_LowerRightLonDec", hx.getNodeValue("GPSEvent", "loRightLonDec"));
+                
+                break;
+            case "#text":   //******* for chrome
+                funcNum++;
+                break;
+        }
+    }
+}
+function chgOutputType(){
+	if(getIdValue("sel_OutputType") == "timeout" || getIdValue("sel_OutputType") == "trans+timeout"){
+		setIdVisibility("td_TimeoutDuration",1);
+		setIdVisibility("txt_TimeoutDuration",1);
+	}else{
+		setIdVisibility("td_TimeoutDuration",0);
+		setIdVisibility("txt_TimeoutDuration",0);
+	}
+}
+function chgCoordinateExpress(){
+	if(getIdValue("sel_CoordinateExpress") == "0"){
+		setIdDisplay("txt_CenterLat01","inline");
+		setIdDisplay("txt_CenterLat02","inline");
+		setIdDisplay("txt_CenterLat03","inline");
+		setIdDisplay("txt_CenterLatDec","none");
+		
+		setIdDisplay("txt_CenterLon01","inline");
+		setIdDisplay("txt_CenterLon02","inline");
+		setIdDisplay("txt_CenterLon03","inline");
+		setIdDisplay("txt_CenterLonDec","none");
+		
+		setIdDisplay("txt_UpperLeftLat02","inline");
+		setIdDisplay("txt_UpperLeftLon02","inline");
+		setIdDisplay("txt_LowerRightLat02","inline");
+		setIdDisplay("txt_LowerRightLon02","inline");
+		setIdDisplay("txt_UpperLeftLat03","inline");
+		setIdDisplay("txt_UpperLeftLon03","inline");
+		setIdDisplay("txt_LowerRightLat03","inline");
+		setIdDisplay("txt_LowerRightLon03","inline");
+		
+		setIdDisplay("txt_UpperLeftLonDec","none");
+		setIdDisplay("txt_UpperLeftLatDec","none");
+		setIdDisplay("txt_LowerRightLonDec","none");
+		setIdDisplay("txt_LowerRightLatDec","none");
+		setIdInnerHTML("a01","°");
+		setIdInnerHTML("a02","°");
+		setIdInnerHTML("a03","°");
+		setIdInnerHTML("a04","°");
+		setIdInnerHTML("a05","°");
+		setIdInnerHTML("a06","°");
+		
+		setIdDisplay("b01","inline");
+		setIdDisplay("b02","inline");
+		setIdDisplay("b03","inline");
+		setIdDisplay("b04","inline");
+		setIdDisplay("b05","inline");
+		setIdDisplay("b06","inline");
+		
+		setIdDisplay("c01","inline");
+		setIdDisplay("c02","inline");
+		setIdDisplay("c03","inline");
+		setIdDisplay("c04","inline");
+		setIdDisplay("c05","inline");
+		setIdDisplay("c06","inline");
+		
+		setIdDisplay("d01","none");
+		setIdDisplay("d02","none");
+		setIdDisplay("d03","none");
+		setIdDisplay("d04","none");
+		setIdDisplay("d05","none");
+		setIdDisplay("d06","none");
+		
+	}else if(getIdValue("sel_CoordinateExpress") == "1"){
+		setIdDisplay("txt_CenterLat01","inline");
+		setIdDisplay("txt_CenterLat02","none");
+		setIdDisplay("txt_CenterLat03","none");
+		setIdDisplay("txt_CenterLatDec","inline");
+		
+		setIdDisplay("txt_CenterLon01","inline");
+		setIdDisplay("txt_CenterLon02","none");
+		setIdDisplay("txt_CenterLon03","none");
+		setIdDisplay("txt_CenterLonDec","inline");
+		
+		setIdDisplay("txt_UpperLeftLat02","none");
+		setIdDisplay("txt_UpperLeftLon02","none");
+		setIdDisplay("txt_LowerRightLat02","none");
+		setIdDisplay("txt_LowerRightLon02","none");
+		setIdDisplay("txt_UpperLeftLat03","none");
+		setIdDisplay("txt_UpperLeftLon03","none");
+		setIdDisplay("txt_LowerRightLat03","none");
+		setIdDisplay("txt_LowerRightLon03","none");
+		
+		setIdDisplay("txt_UpperLeftLonDec","inline");
+		setIdDisplay("txt_UpperLeftLatDec","inline");
+		setIdDisplay("txt_LowerRightLonDec","inline");
+		setIdDisplay("txt_LowerRightLatDec","inline");
+		
+		setIdInnerHTML("a01",".");
+		setIdInnerHTML("a02",".");
+		setIdInnerHTML("a03",".");
+		setIdInnerHTML("a04",".");
+		setIdInnerHTML("a05",".");
+		setIdInnerHTML("a06",".");
+		
+		setIdDisplay("b01","none");
+		setIdDisplay("b02","none");
+		setIdDisplay("b03","none");
+		setIdDisplay("b04","none");
+		setIdDisplay("b05","none");
+		setIdDisplay("b06","none");
+		
+		setIdDisplay("c01","none");
+		setIdDisplay("c02","none");
+		setIdDisplay("c03","none");
+		setIdDisplay("c04","none");
+		setIdDisplay("c05","none");
+		setIdDisplay("c06","none");
+		
+		setIdDisplay("d01","inline");
+		setIdDisplay("d02","inline");
+		setIdDisplay("d03","inline");
+		setIdDisplay("d04","inline");
+		setIdDisplay("d05","inline");
+		setIdDisplay("d06","inline");
+	}
+}
+function chgGPSBorderType(){
+	if(getIdValue("sel_GPSBorderType") == "0"){
+		setIdDisplay("tr_CenterLat", "table-row");
+		setIdDisplay("tr_CenterLon", "table-row");
+		setIdDisplay("tr_Radius", "table-row");
+		setIdDisplay("tr_UpperLeftLat", "none");
+		setIdDisplay("tr_UpperLeftLon", "none");
+		setIdDisplay("tr_LowerRightLat", "none");
+		setIdDisplay("tr_LowerRightLon", "none");
+	}else if(getIdValue("sel_GPSBorderType") == "1"){
+		setIdDisplay("tr_CenterLat", "none");
+		setIdDisplay("tr_CenterLon", "none");
+		setIdDisplay("tr_Radius", "none");
+		setIdDisplay("tr_UpperLeftLat", "table-row");
+		setIdDisplay("tr_UpperLeftLon", "table-row");
+		setIdDisplay("tr_LowerRightLat", "table-row");
+		setIdDisplay("tr_LowerRightLon", "table-row");
+	}
+}
+function GetXML(){
+    hx.setUrl("../cgi-bin/EventGPSEvent.xml");
+}
+
+function SetXML(){
+	var hx2 = new HandleXml();
+	var str = "";
+	var funcNum = 0;
+	var Cnt = 0;
+	var i = 0;
+	EFDEF_("^td_").className("txtLeft");
+
+	funcNum = setHx.getNodeChildSize("GPSEVENT");
+	for (Cnt = 0; Cnt < funcNum; Cnt++) {
+	    switch (setHx.getNodeChildName("GPSEVENT", Cnt)) {
+	        case "EmailNotify":
+				hx.setNodeValue(getIdChecked("chk_EmailNotify"), "GPSEvent", "emailNotify");
+                break;
+            case "NetworkAlarm":
+            	hx.setNodeValue(getIdChecked("chk_NetworkAlarm"), "GPSEvent", "networkAlarm");
+                break;
+            case "AlarmOutput":
+            	hx.setNodeValue(getIdValue("sel_AlarmOutput"), "GPSEvent", "alarmOutput");
+                break;
+            case "OutputType":
+            	hx.setNodeValue(getIdValue("sel_OutputType"), "GPSEvent", "alarmOutputType");
+            	hx.setNodeValue(getIdValue("txt_TimeoutDuration"), "GPSEvent", "timeoutDuration");
+                break;
+            case "GPSSpeed":
+            	hx.setNodeValue(getIdValue("sel_GPSSpeed"), "GPSEvent", "speed");
+                break;
+            case "SpeedHigherLimit":
+            	hx.setNodeValue(getIdValue("txt_SpeedHigherLimit"), "GPSEvent", "highterLimit");
+                break;
+            case "SpeedUnit":
+            	hx.setNodeValue(getIdValue("sel_SpeedUnit"), "GPSEvent", "dispUint");
+                break;
+            case "GPSAlarm":
+            	hx.setNodeValue(getIdValue("sel_GPSAlarm"), "GPSEvent", "alarm");
+                break;
+            case "GPSBorderType":
+            	hx.setNodeValue(getIdValue("sel_GPSBorderType"), "GPSEvent", "borderType");
+                break;
+            case "CoordinateExpress":
+            	hx.setNodeValue(getIdValue("sel_CoordinateExpress"), "GPSEvent", "gpsFormat");
+            	
+            	hx.setNodeValue(getIdValue("sel_CenterLat"), "GPSEvent", "centerLatDir");
+            	hx.setNodeValue(getIdValue("txt_CenterLat01"), "GPSEvent", "centerLat");
+            	hx.setNodeValue(getIdValue("txt_CenterLat02"), "GPSEvent", "centerLatMin");
+            	hx.setNodeValue(getIdValue("txt_CenterLat03"), "GPSEvent", "centerLatSec");
+            	hx.setNodeValue(getIdValue("txt_CenterLatDec"), "GPSEvent", "centerLatDec");
+            	
+            	hx.setNodeValue(getIdValue("sel_CenterLon"), "GPSEvent", "centerLonDir");
+            	hx.setNodeValue(getIdValue("txt_CenterLon01"), "GPSEvent", "centerLon");
+            	hx.setNodeValue(getIdValue("txt_CenterLon02"), "GPSEvent", "centerLonMin");
+            	hx.setNodeValue(getIdValue("txt_CenterLon03"), "GPSEvent", "centerLonSec");
+            	hx.setNodeValue(getIdValue("txt_CenterLonDec"), "GPSEvent", "centerLonDec");
+            	
+            	hx.setNodeValue(getIdValue("sel_Radius"), "GPSEvent", "radiusUnit");
+            	hx.setNodeValue(getIdValue("txt_Radius"), "GPSEvent", "radius");
+            	
+            	hx.setNodeValue(getIdValue("sel_UpperLeftLat"), "GPSEvent", "upLeftLatDir");
+            	hx.setNodeValue(getIdValue("txt_UpperLeftLat01"), "GPSEvent", "upLeftLat");
+            	hx.setNodeValue(getIdValue("txt_UpperLeftLat02"), "GPSEvent", "upLeftLatMin");
+            	hx.setNodeValue(getIdValue("txt_UpperLeftLat03"), "GPSEvent", "upLeftLatSec");
+            	hx.setNodeValue(getIdValue("txt_UpperLeftLatDec"), "GPSEvent", "upLeftLatDec");
+            	
+            	hx.setNodeValue(getIdValue("sel_UpperLeftLon"), "GPSEvent", "upLeftLonDir");
+            	hx.setNodeValue(getIdValue("txt_UpperLeftLon01"), "GPSEvent", "upLeftLon");
+            	hx.setNodeValue(getIdValue("txt_UpperLeftLon02"), "GPSEvent", "upLeftLonMin");
+            	hx.setNodeValue(getIdValue("txt_UpperLeftLon03"), "GPSEvent", "upLeftLonSec");
+            	hx.setNodeValue(getIdValue("txt_UpperLeftLonDec"), "GPSEvent", "upLeftLonDec");
+            	
+            	hx.setNodeValue(getIdValue("sel_LowerRightLat"), "GPSEvent", "loRightLatDir");
+            	hx.setNodeValue(getIdValue("txt_LowerRightLat01"), "GPSEvent", "loRightLat");
+            	hx.setNodeValue(getIdValue("txt_LowerRightLat02"), "GPSEvent", "loRightLatMin");
+            	hx.setNodeValue(getIdValue("txt_LowerRightLat03"), "GPSEvent", "loRightLatSec");
+            	hx.setNodeValue(getIdValue("txt_LowerRightLatDec"), "GPSEvent", "loRightLatDec");
+            	
+            	hx.setNodeValue(getIdValue("sel_LowerRightLon"), "GPSEvent", "loRightLonDir");
+            	hx.setNodeValue(getIdValue("txt_LowerRightLon01"), "GPSEvent", "loRightLon");
+            	hx.setNodeValue(getIdValue("txt_LowerRightLon02"), "GPSEvent", "loRightLonMin");
+            	hx.setNodeValue(getIdValue("txt_LowerRightLon03"), "GPSEvent", "loRightLonSec");
+            	hx.setNodeValue(getIdValue("txt_LowerRightLonDec"), "GPSEvent", "loRightLonDec");
+            	
+                break;
+	        case "#text":   //******* for chrome
+	            funcNum++;
+	            break;
+	    }
+	}
+
+	//var newxml = hx.getXml().xml.replace(/\t/g, "");
+	var newxml;
+	if (window.ActiveXObject) {
+	    newxml = hx.getXml().xml.replace(/\t/g, "");
+	}
+	else {
+	    newxml = (new XMLSerializer()).serializeToString(hx.getXml()).replace(/\t/g, "");
+	}
+	ajax.postData("../cgi-bin/EventGPSEvent.xml", newxml);
+	hx2.setXml(ajax.data);
+	if(hx2.getNodeValue("result") == "1"){
+		alert(hl.get("SUCCESS"));
+	}else{
+		alert(hl.get("FAIL"));
+	}
+	parent.showMsg(hx.getXml().xml,"xml");
+}
+function setLanguage(){
+	EFDEF_("^td_").className("txtLeft");
+	EFDEF_("^a0").className("txtLeft");
+	EFDEF_("^b0").className("txtLeft");
+	EFDEF_("^c0").className("txtLeft");
+	EFDEF_("^d0").className("txtLeft");
+	setIdValue("btn_Save", hl.get("SAVE"));
+}
+</script>
+</head>
+<body onload="init();">
+	<div class="ClientFrame">
+    <table border="0" cellspacing="5" cellpadding="0">
+    <tr>
+        <td valign="top">
+            <table border="0" cellspacing="5" cellpadding="0">
+			<tr>
+				<td id="td_EventAction" class="txtLeft" width="200px" style="display: none;">Event Action</td>
+				<td width="50px"></td>
+			</tr>
+			<tr>
+				<td id="td_EmailNotify" style="display: none;">Email Notify</td>
+				<td>
+					<input type="checkbox" id="chk_EmailNotify" style="display: none;"/>
+				</td>
+			</tr>
+			<tr>
+				<td id="td_NetworkAlarm" style="display: none;">Network Alarm</td>
+				<td>
+					<input type="checkbox" id="chk_NetworkAlarm" style="display: none;"/>
+				</td>
+			</tr>
+            <tr>
+                <td id="td_AlarmOutput" style="display: none;">Alarm Output</td>
+				<td>
+                    <select id="sel_AlarmOutput" style="display: none;"></select>
+				</td>
+            </tr>
+            <tr>
+                <td id="td_OutputType" style="display: none;">Output Type</td>
+				<td>
+                    <select id="sel_OutputType" style="display: none;" onchange="chgOutputType();"></select>
+				</td>
+            </tr>
+            <tr>
+                <td id="td_TimeoutDuration">Timeout Duration</td>
+				<td>
+                    <input type="text" id="txt_TimeoutDuration" onblur="CheckCharKeyin(this,0,10,150);"/>
+				</td>
+            </tr>
+		    </table>
+        </td>
+        <td valign="top">
+            <table id="tbl_call" border="0" cellspacing="5" cellpadding="0">
+			<tr>
+				<td id="td_Speed" class="txtLeft" width="200px" style="display: none;">Speed</td>
+				<td width="50px"></td>
+			</tr>
+			<tr>
+				<td id="td_GPSSpeed" style="display: none;">GPS Speed</td>
+				<td>
+					<select id="sel_GPSSpeed" style="display: none;"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="td_SpeedHigherLimit" style="display: none;">Speed Higher Limit</td>
+				<td>
+					<input type="text" id="txt_SpeedHigherLimit" style="display: none;" maxlength="3" onblur="CheckCharKeyin(this,0,0,999);"/>
+				</td>
+			</tr>
+			<tr>
+				<td id="td_SpeedUnit" style="display: none;">Speed Unit</td>
+				<td>
+					<select id="sel_SpeedUnit" style="display: none;"></select>
+				</td>
+			</tr>
+		    </table>
+        </td>
+    </tr>
+	</table>
+	<table border="0" cellspacing="5" cellpadding="0">
+		<tr>
+			<td id="td_Fencing" class="txtLeft" width="200px" style="display: none;">Fencing</td>
+			<td width="230px"></td>
+		</tr>
+		<tr>
+			<td id="td_GPSAlarm" style="display: none;">GPS Alarm</td>
+			<td>
+				<select id="sel_GPSAlarm" style="display: none;"></select>
+			</td>
+		</tr>
+		<tr>
+			<td id="td_GPSBorderType" style="display: none;">GPS Border Type</td>
+			<td>
+				<select id="sel_GPSBorderType" style="display: none;" onchange="chgGPSBorderType();"></select>
+			</td>
+		</tr>
+		<tr>
+			<td id="td_CoordinateExpress" style="display: none;">Coordinate Express</td>
+			<td>
+				<select id="sel_CoordinateExpress" style="display: none; width: 150px;" onchange="chgCoordinateExpress();"></select>
+			</td>
+		</tr>
+		
+		
+		
+		<tr id="tr_CenterLat" style="display: none">
+			<td id="td_CenterLat">Center Lat.</td>
+			<td>
+				<select id="sel_CenterLat" style="width: 40px"></select>
+				<input type="text" id="txt_CenterLat01" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,90);"/>
+				<span id="a01">°</span>
+				<input type="text" id="txt_CenterLat02" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="b01">'</span>
+				<input type="text" id="txt_CenterLat03" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="c01">"</span>
+				<input type="text" id="txt_CenterLatDec" maxlength="6" style="width: 45px" onblur="CheckCharKeyin(this,0,0,999999);"/>
+				<span id="d01">°</span>
+			</td>
+		</tr>
+		<tr id="tr_CenterLon" style="display: none">
+			<td id="td_CenterLon">Center Lon.</td>
+			<td>
+				<select id="sel_CenterLon" style="width: 40px"></select>
+				<input type="text" id="txt_CenterLon01" maxlength="3" style="width: 30px" onblur="CheckCharKeyin(this,0,0,180);"/>
+				<span id="a02">°</span>
+				<input type="text" id="txt_CenterLon02" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="b02">'</span>
+				<input type="text" id="txt_CenterLon03" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="c02">"</span>
+				<input type="text" id="txt_CenterLonDec" maxlength="6" style="width: 45px" onblur="CheckCharKeyin(this,0,0,999999);"/>
+				<span id="d02">°</span>
+			</td>
+		</tr>
+		<tr id="tr_Radius" style="display: none">
+			<td id="td_Radius">Radius</td>
+			<td>
+				<input type="text" id="txt_Radius" maxlength="3" style="width: 30px" onblur="CheckCharKeyin(this,0,0,999);"/>
+				<select id="sel_Radius" style="width: 55px"></select>
+			</td>
+		</tr>
+		
+		
+		
+		<tr id="tr_UpperLeftLat" style="display: none">
+			<td id="td_UpperLeftLat">Upper Left Lat.</td>
+			<td>
+				<select id="sel_UpperLeftLat" style="width: 40px"></select>
+				<input type="text" id="txt_UpperLeftLat01" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,90);"/>
+				<span id="a03">°</span>
+				<input type="text" id="txt_UpperLeftLat02" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="b03">'</span>
+				<input type="text" id="txt_UpperLeftLat03" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="c03">"</span>
+				<input type="text" id="txt_UpperLeftLatDec" maxlength="6" style="width: 45px" onblur="CheckCharKeyin(this,0,0,999999);"/>
+				<span id="d03">°</span>
+			</td>
+		</tr>
+		<tr id="tr_UpperLeftLon" style="display: none">
+			<td id="td_UpperLeftLon">Upper Left Lon.</td>
+			<td>
+				<select id="sel_UpperLeftLon" style="width: 40px"></select>
+				<input type="text" id="txt_UpperLeftLon01" maxlength="3" style="width: 30px" onblur="CheckCharKeyin(this,0,0,180);"/>
+				<span id="a04">°</span>
+				<input type="text" id="txt_UpperLeftLon02" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="b04">'</span>
+				<input type="text" id="txt_UpperLeftLon03" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="c04">"</span>
+				<input type="text" id="txt_UpperLeftLonDec" maxlength="6" style="width: 45px" onblur="CheckCharKeyin(this,0,0,999999);"/>
+				<span id="d04">°</span>
+			</td>
+		</tr>
+		<tr id="tr_LowerRightLat" style="display: none">
+			<td id="td_LowerRightLat">Lower Right Lat.</td>
+			<td>
+				<select id="sel_LowerRightLat" style="width: 40px"></select>
+				<input type="text" id="txt_LowerRightLat01" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,90);"/>
+				<span id="a05">°</span>
+				<input type="text" id="txt_LowerRightLat02" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="b05">'</span>
+				<input type="text" id="txt_LowerRightLat03" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="c05">"</span>
+				<input type="text" id="txt_LowerRightLatDec" maxlength="6" style="width: 45px" onblur="CheckCharKeyin(this,0,0,999999);"/>
+				<span id="d05">°</span>
+			</td>
+		</tr>
+		<tr id="tr_LowerRightLon" style="display: none">
+			<td id="td_LowerRightLon">Lower Right Lon.</td>
+			<td>
+				<select id="sel_LowerRightLon" style="width: 40px"></select>
+				<input type="text" id="txt_LowerRightLon01" maxlength="3" style="width: 30px" onblur="CheckCharKeyin(this,0,0,180);"/>
+				<span id="a06">°</span>
+				<input type="text" id="txt_LowerRightLon02" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="b06">'</span>
+				<input type="text" id="txt_LowerRightLon03" maxlength="2" style="width: 30px" onblur="CheckCharKeyin(this,0,0,59);"/>
+				<span id="c06">"</span>
+				<input type="text" id="txt_LowerRightLonDec" maxlength="6" style="width: 45px" onblur="CheckCharKeyin(this,0,0,999999);"/>
+				<span id="d06">°</span>
+			</td>
+		</tr>
+	</table>
+	</div>
+	<div class="applyFrm">
+		<input type="button" id="btn_Save" class="btnStyle" value="" style="width:120px;" onclick="SetXML();"/>
+	</div>
+</body>
+</html>

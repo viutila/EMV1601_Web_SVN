@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Pragma" content="no-store, no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="cache-control" content="no-store, no-cache, must-revalidate">
+<link rel="stylesheet" type="text/css" href="../include/css/style.css">
+<script type="text/javascript" src="../include/js/utility.js"></script>
+<script type="text/javascript" src="../include/js/AjaxClass.js"></script>
+<script type="text/javascript" src="../include/js/HandleXml.js"></script>
+<script type="text/javascript">
+var hl = parent.hl;
+var ajax = new AjaxClass();
+var hx = new HandleXml();
+var setHx = new HandleXml();
+var callScreenModeFlag = 0;
+
+function init(){
+	setLanguage();
+	setHx.setUrl("../" + parent.g_device_xml_name);
+	GetXML();
+	initFunc();
+	chgOutputType();
+}
+
+function initFunc() {
+    var funcNum = 0;
+    var Cnt = 0;
+    var i = 0;
+    var str = "GSensorEvent";
+    EFDEF_("^td_").className("txtLeft");
+
+    funcNum = setHx.getNodeChildSize("GSONSOREVENT");
+    for (Cnt = 0; Cnt < funcNum; Cnt++) {
+
+        switch (setHx.getNodeChildName("GSONSOREVENT", Cnt)) {
+            case "GSensor":
+                setIdDisplay("td_GSensor", "table-cell");
+                setIdDisplay("sel_GSensor", "inline");
+                var hs = new HandleSelect("sel_GSensor", 0);
+                var stamp = parent.SetHx.getNodeValue("EventSetting", "GSensorOnOff").split(",");
+                for (i = 0; i < stamp.length; i++) {
+                    hs.addOpt(i, stamp[i], i);
+                }
+                setIdValue("sel_GSensor", hx.getNodeValue(str, "enable"));
+                break;
+            case "EmailNotify":
+                setIdDisplay("td_EmailNotify", "table-cell");
+                setIdDisplay("chk_EmailNotify", "inline");
+                setIdChecked("chk_EmailNotify", hx.getNodeValue(str, "emailNotify"));
+                break;
+            case "NetworkAlarm":
+                setIdDisplay("td_NetworkAlarm", "table-cell");
+                setIdDisplay("chk_NetworkAlarm", "inline");
+                setIdChecked("chk_NetworkAlarm", hx.getNodeValue(str, "networkAlarm"));
+
+                break;
+            case "XYAxial":
+                setIdDisplay("td_XYAxialTriggerVal", "table-cell");
+                setIdDisplay("txt_XYAxialTriggerVal", "inline");
+                setIdValue("txt_XYAxialTriggerVal", hx.getNodeValue(str, "horizontal"));
+                break;
+            case "ZAxial":
+            	setIdDisplay("td_ZAxialTriggerVal", "table-cell");
+                setIdDisplay("txt_ZAxialTriggerVal", "inline");
+                setIdValue("txt_ZAxialTriggerVal", hx.getNodeValue(str, "vertical"));
+                break;
+            case "Alarmoutput":
+                setIdDisplay("td_AlarmOutput", "table-cell");
+                setIdDisplay("sel_AlarmOutput", "inline");
+                parent.setSelectOutput(EFDEF_id("sel_AlarmOutput"), parent.g_OutputSum);
+                setIdValue("sel_AlarmOutput", hx.getNodeValue(str, "alarmOutput"));
+                break;
+            case "Outputtype":
+                setIdDisplay("td_OutputType", "table-cell");
+                setIdDisplay("sel_OutputType", "inline");
+                
+                var type = parent.SetHx.getNodeValue("EventSetting", "GSensorAlarmType").split(",");
+                var hs = new HandleSelect("sel_OutputType", 0);
+                var tArray = parent.transLangArray(type);
+                for (i = 0; i < type.length; i++) {
+                    hs.addOpt(i, hl.get(tArray[i]), type[i].toLowerCase());
+                }
+                setIdValue("sel_OutputType", hx.getNodeValue(str, "alarmOutputType"));
+                setIdValue("txt_TimeoutDuration", hx.getNodeValue(str, "timeoutDuration"));
+                break;
+            case "#text":   //******* for chrome
+                funcNum++;
+                break;
+        }
+    }
+}
+function chgOutputType(){
+	if(getIdValue("sel_OutputType") == "timeout" || getIdValue("sel_OutputType") == "trans+timeout"){
+		setIdVisibility("td_TimeoutDuration",1);
+		setIdVisibility("txt_TimeoutDuration",1);
+	}else{
+		setIdVisibility("td_TimeoutDuration",0);
+		setIdVisibility("txt_TimeoutDuration",0);
+	}
+}
+function GetXML(){
+    hx.setUrl("../cgi-bin/EventGSensorEvent.xml");
+}
+
+function SetXML(){
+	var hx2 = new HandleXml();
+	var str = "GSensorEvent";
+	var funcNum = 0;
+	var Cnt = 0;
+	var i = 0;
+	EFDEF_("^td_").className("txtLeft");
+
+	funcNum = setHx.getNodeChildSize("GSONSOREVENT");
+	for (Cnt = 0; Cnt < funcNum; Cnt++) {
+	    switch (setHx.getNodeChildName("GSONSOREVENT", Cnt)) {
+	        case "GSensor":
+				hx.setNodeValue(getIdValue("sel_GSensor"), str, "enable");
+                break;
+            case "EmailNotify":
+            	hx.setNodeValue(getIdChecked("chk_EmailNotify"), str, "emailNotify");
+                break;
+            case "NetworkAlarm":
+            	hx.setNodeValue(getIdChecked("chk_EmailNotify"), str, "networkAlarm");
+                break;
+            case "XYAxial":
+            	hx.setNodeValue(getIdValue("txt_XYAxialTriggerVal"), str, "horizontal");
+                break;
+            case "ZAxial":
+            	hx.setNodeValue(getIdValue("txt_ZAxialTriggerVal"), str, "vertical");
+                break;
+            case "Alarmoutput":
+            	hx.setNodeValue(getIdValue("sel_AlarmOutput"), str, "alarmOutput");
+                break;
+            case "Outputtype":
+            	hx.setNodeValue(getIdValue("sel_OutputType"), str, "alarmOutputType");
+            	hx.setNodeValue(getIdValue("txt_TimeoutDuration"), str, "timeoutDuration");
+                break;
+	        case "#text":   //******* for chrome
+	            funcNum++;
+	            break;
+	    }
+	}
+
+	//var newxml = hx.getXml().xml.replace(/\t/g, "");
+	var newxml;
+	if (window.ActiveXObject) {
+	    newxml = hx.getXml().xml.replace(/\t/g, "");
+	}
+	else {
+	    newxml = (new XMLSerializer()).serializeToString(hx.getXml()).replace(/\t/g, "");
+	}
+	ajax.postData("../cgi-bin/EventGSensorEvent.xml", newxml);
+	hx2.setXml(ajax.data);
+	if(hx2.getNodeValue("result") == "1"){
+		alert(hl.get("SUCCESS"));
+	}else{
+		alert(hl.get("FAIL"));
+	}
+	parent.showMsg(hx.getXml().xml,"xml");
+}
+function setLanguage(){
+	EFDEF_("^td_").className("txtLeft");
+	setIdValue("btn_Save", hl.get("SAVE"));
+}
+</script>
+</head>
+<body onload="init();">
+	<div class="ClientFrame">
+            <table border="0" cellspacing="5" cellpadding="0">
+			<tr>
+				<td id="td_GSensor" style="display: none;">G Sensor</td>
+				<td>
+					<select id="sel_GSensor" style="display: none;"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="td_EmailNotify" style="display: none;">Email Notify</td>
+				<td>
+					<input type="checkbox" id="chk_EmailNotify" style="display: none;"/>
+				</td>
+			</tr>
+			<tr>
+				<td id="td_NetworkAlarm" style="display: none;">Network Alarm</td>
+				<td>
+					<input type="checkbox" id="chk_NetworkAlarm" style="display: none;"/>
+				</td>
+			</tr>
+            <tr>
+                <td id="td_XYAxialTriggerVal" style="display: none;">XY Axial Trigger Val</td>
+				<td>
+                    <input type="text" id="txt_XYAxialTriggerVal" style="display: none;" onblur="CheckCharKeyin(this,0,0,127);"/> x 72mg
+				</td>
+            </tr>
+            <tr>
+                <td id="td_ZAxialTriggerVal" style="display: none;">Z Axial Trigger Val</td>
+				<td>
+                    <input type="text" id="txt_ZAxialTriggerVal" style="display: none;" onblur="CheckCharKeyin(this,0,0,127);"/> x 72mg
+				</td>
+            </tr>
+            <tr>
+                <td id="td_AlarmOutput" style="display: none;">Alarm Output</td>
+				<td>
+                    <select id="sel_AlarmOutput" style="display: none;"></select>
+				</td>
+            </tr>
+            <tr>
+                <td id="td_OutputType" style="display: none;">Output Type</td>
+				<td>
+                    <select id="sel_OutputType" style="display: none;" onchange="chgOutputType();"></select>
+				</td>
+            </tr>
+            <tr>
+                <td id="td_TimeoutDuration">Timeout Duration</td>
+				<td>
+                    <input type="text" id="txt_TimeoutDuration" onblur="CheckCharKeyin(this,0,10,150);"/>
+				</td>
+            </tr>
+		    </table>
+	</div>
+	<div class="applyFrm">
+		<input type="button" id="btn_Save" class="btnStyle" value="" style="width:120px;" onclick="SetXML();"/>
+	</div>
+</body>
+</html>

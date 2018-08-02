@@ -1,0 +1,508 @@
+﻿<!DOCTYPE html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../include/css/style.css">
+<link rel="stylesheet" type="text/css" href="../include/css/ScreenMask.css">
+<link rel="stylesheet" type="text/css" href="../include/css/MultipleCheckbox.css">
+<script type="text/javascript" src="../include/js/utility.js"></script>
+<script type="text/javascript" src="../include/js/AjaxClass.js"></script>
+<script type="text/javascript" src="../include/js/HandleXml.js"></script>
+<script type="text/javascript" src="../include/js/cgi.js"></script>
+<script type="text/javascript" src="../include/js/ScreenMask.js"></script>
+<script type="text/javascript">
+<!--
+var hl = parent.hl;
+var ajax = new AjaxClass();
+var ajax2 = new AjaxClass();
+var hx = new HandleXml();
+var listHx = new HandleXml();
+//var hybridCameraHx = new HandleXml();
+var sm;
+var mc_apply;
+var modify_id;
+var cgi = new cgi();
+var timeFlag;
+var ipCamCount = 0; 
+
+function init() {
+   
+    GetXML();
+    initTable();
+    setLanguage();
+}
+
+    //no use
+function refreshTable() {
+    timeFlag=setTimeout(function(){
+        GetXML();
+        initTable();},15000);
+}
+function GetXML() {
+    //listHx.setUrl("../xml/ENVR8304XIPCamList.xml");
+    listHx.setUrl("../cgi-bin/ENVR8304XIPCamList.xml");
+    hx.setUrl("../cgi-bin/IPCam.xml");
+    //hybridCameraHx.setUrl("../cgi-bin/HybridCamera.xml");
+
+}
+
+function changeType(channelNumber) {
+    var obj = document.getElementById("btnType" + channelNumber);
+    //alert("channelNumber = " + channelNumber + " obj.value = " + obj.value);
+
+    if (obj.value == "Analog") {
+        obj.value = "IPCam";
+
+        
+        //要檢查有沒有data show
+
+        var str = "";
+        str = "camera" + channelNumber;
+
+        recStatus = listHx.getNodeValue(str, "recordStatus");
+        ipAddress = listHx.getNodeValue(str, "ipAddress");
+        frameRate = listHx.getNodeValue(str, "normalSpeed");
+        connectStatus = listHx.getNodeValue(str, "connectStatus");
+
+        //***********************************************************************************************
+        if (parseInt(recStatus) == 1)
+            //recStr = hl.get("RECORDING"); //multi-lang
+            recStr = hl.get("YES"); //multi-lang
+        else if (parseInt(recStatus) == 0)
+            recStr = hl.get("NO");
+            //recStr = hl.get("NO_RECORDING");
+        else {
+            recStr = hl.get("DISCONNECT");
+            ipAddress = "---";
+            frameRate = "---";
+            bitRate = "---";
+            connectStatus = "----------";
+        }
+        //type = 0;
+        //***********************************************************************************************
+
+        if (parseInt(connectStatus) == 0)//0
+        {
+            connStr = hl.get("DISCONNECT");
+            ipAddress = "---";
+            frameRate = "---";
+            bitRate = "---";
+            connectStatus = "----------";
+        }
+        else if (parseInt(connectStatus) == 1) {
+            connStr = hl.get("CONNECT");
+        } else {
+            connStr = "Need Authorization";
+        }
+
+
+
+
+        setIdInnerHTML("td_camera_ip_address_" + channelNumber, ipAddress);
+        setIdInnerHTML("td_camera_frame_rate_" + channelNumber, (frameRate + " fps"));
+        setIdInnerHTML("td_camera_rec_status_" + channelNumber, recStr);
+        setIdInnerHTML("td_camera_connect_status_" + channelNumber, connectStatus);
+        setIdDisabled("btnAdd" + channelNumber, false);
+        setIdDisabled("btnSet" + channelNumber, false);
+
+        ipCamCount++;
+        //IPCam
+        //也要檢查有沒有超過八個
+        if (ipCamCount > 8) {
+            //alert("ipCamCount > 8");
+
+            for (var j = 1 ; j <= parent.g_ipcam_num ; j++) {
+                var obj2 = document.getElementById("btnType" + j);
+                if (obj2.value == "IPCam") {
+                    setIdDisabled("btnAdd" + j, true);
+                    setIdDisabled("btnSet" + j, true);
+                }
+            }
+
+        }
+    } else if (obj.value == "IPCam") {
+        obj.value = "Mask";
+        //Mask
+        recStr = "---"
+        ipAddress = "---";
+        frameRate = "---";
+        connectStatus = "----------";
+        setIdInnerHTML("td_camera_ip_address_" + channelNumber, ipAddress);
+        setIdInnerHTML("td_camera_frame_rate_" + channelNumber, frameRate);
+        setIdInnerHTML("td_camera_rec_status_" + channelNumber, recStr);
+        setIdInnerHTML("td_camera_connect_status_" + channelNumber, connectStatus);
+        setIdDisabled("btnAdd" + channelNumber, true);
+        setIdDisabled("btnSet" + channelNumber, true);
+
+        ipCamCount--;
+        if (ipCamCount > 8) {
+            //alert("ipCamCount > 8");
+        } else {
+            //alert("ipCamCount <= 8");
+            for (var j = 1 ; j <= parent.g_ipcam_num ; j++) {
+                var obj2 = document.getElementById("btnType" + j);
+                if (obj2.value == "IPCam") {
+                    setIdDisabled("btnAdd" + j, false);
+                    setIdDisabled("btnSet" + j, false);
+                }
+            }
+        }
+    } else {//Mask
+        obj.value = "Analog";
+
+        recStr = "---"
+        ipAddress = "---";
+        frameRate = "---";
+        connectStatus = "----------";
+        setIdInnerHTML("td_camera_ip_address_" + channelNumber, ipAddress);
+        setIdInnerHTML("td_camera_frame_rate_" + channelNumber, frameRate);
+        setIdInnerHTML("td_camera_rec_status_" + channelNumber, recStr);
+        setIdInnerHTML("td_camera_connect_status_" + channelNumber, connectStatus);
+        setIdDisabled("btnAdd" + channelNumber, true);
+        setIdDisabled("btnSet" + channelNumber, false);
+
+        //Analog
+        //if (ipCamCount > 8) {
+        //    alert("ipCamCount > 8");
+        //}
+    }
+}
+
+function add(channelNumber) {
+    var obj = document.getElementById("btnType" + channelNumber);
+
+    parent.ifrm_View.location.replace("./HybridIPCamBasicSetting.html?channelNumber=" + channelNumber);
+}
+
+function set(channelNumber) {
+    var obj = document.getElementById("btnType" + channelNumber);
+
+    if (obj.value == "Analog") {
+        parent.ifrm_View.location.replace("./HybridBasicSetting.html?channelNumber=" + channelNumber);
+    } else {
+        var ifConnected = checkConnect(channelNumber);
+        if (ifConnected == true) {
+            parent.ifrm_View.location.replace("./HybridAdvanceSetting.html?channelNumber=" + channelNumber);
+        } else {
+            alert("Channel no connect");
+        }
+        
+    }
+}
+
+function checkConnect(channelNumber) {
+    if (hx.getNodeValue("camera" + channelNumber, "ipAddress") == "0.0.0.0"){
+        return false;
+    }
+    else {
+        return true;
+    }
+
+    //setIdDisplay("div_list", "none");
+    //cleanIp();
+    //setIdInnerHTML("td_add_ip_cam", hl.get("MODIFY_IP_CAMERA"));
+    //setIdValue("sel_channel", id);
+    //setIdDisabled("sel_channel", true);
+    //setIPcamBaseic(id);
+    //setIdDisplay("div_detection", "inline");
+    //setIdDisplay("div_modify_btn", "inline");
+    ////checkBrand();
+    //checkBrandinit();
+}
+function initTable() {
+
+
+    var ht = new HandleTable("tbl_list");
+    ht.clear();
+    var str = "";
+    //var name, rate, voltage, recordstatus, connectstatus, bitrate, bitrate;
+    var name, ipAddress, port, frameRate, recStatus, connectStatus, bitRate;
+    var type;
+    var dataCnt = 0;
+    var recStr, connStr;
+    for (var cnt = 1; cnt <= parent.g_ipcam_num; cnt++) {
+        str = "camera" + cnt;
+
+
+        //list style
+        ht.insertRow().id("tbl_tr_" + cnt).onmouseover(
+					function () {
+					    setIdBgColor(this, "#F5FFFA");
+					})
+				.onmouseout(
+					function () {
+					    var id = this.id.split("_")[2];
+                        if(id % 2)
+                            setIdBgColor(this, "#CCCCCC");
+                        else
+                            setIdBgColor(this, "");
+					});
+        if (cnt % 2)
+            setIdBgColor("tbl_tr_" + cnt, "#CCCCCC");
+
+
+        //getXml data
+        name = listHx.getNodeValue(str, "model");
+        ipAddress = listHx.getNodeValue(str, "ipAddress");
+        port = listHx.getNodeValue(str, "httpPort");
+        frameRate = listHx.getNodeValue(str, "normalSpeed");
+        bitRate = listHx.getNodeValue(str, "bitrate");
+        recStatus = listHx.getNodeValue(str, "recordStatus");
+        connectStatus = listHx.getNodeValue(str, "connectStatus");
+        type = listHx.getNodeValue(str, "type");//Analog , IPCam , Mask
+
+        bitRate = (parseFloat(bitRate)/10.0);
+
+        
+        
+
+        //***********************************************************************************************
+        if (parseInt(recStatus) == 1)
+            //recStr = hl.get("RECORDING"); //multi-lang
+            recStr = hl.get("YES"); //multi-lang
+        else if (parseInt(recStatus) == 0)
+            recStr = hl.get("NO");
+            //recStr = hl.get("NO_RECORDING");
+        else {
+            recStr = hl.get("DISCONNECT");
+            ipAddress = "---";
+            frameRate = "---";
+            bitRate = "---";
+            connectStatus = "----------";
+        }
+        //type = 0;
+        //***********************************************************************************************
+
+        if (parseInt(connectStatus) == 0)//0
+        {
+            connStr = hl.get("DISCONNECT");
+            ipAddress = "---";
+            frameRate = "---";
+            bitRate = "---";
+            connectStatus = "----------";
+        } 
+        else if (parseInt(connectStatus) == 1) {
+            connStr = hl.get("CONNECT");
+        } else {
+            connStr = "Need Authorization";
+        }
+        
+
+
+
+        ht.insertCell().fontSize("16px").textAlign("center")//name
+					.width(90)
+					.innerHTML("CH" + cnt.toFill(2));
+        /*ht.insertCell().id("td_camera_type_" + cnt).fontSize("16px").textAlign("center")//type
+					.width(90)
+					.innerHTML(type);*/
+
+        ht.insertCell().className("txtCenter")
+                   .width(90)
+                   .innerHTML("<input type='button' id='btnType" + cnt + "' value='" + type + "' class='advButton' style='width:90px' onclick='changeType(" + cnt + ")'/>");
+        ht.insertCell().id("td_camera_ip_address_" + cnt).fontSize("16px").textAlign("center")//ip
+					.width(210)
+					.innerHTML(ipAddress); 
+        ht.insertCell().id("td_camera_frame_rate_" + cnt).fontSize("16px").textAlign("center")//fps
+					.width(80)
+					.innerHTML(frameRate + " fps");
+        ht.insertCell().id("td_camera_rec_status_" + cnt).fontSize("16px").textAlign("center")//Rec
+					.width(50)
+					.innerHTML(recStr);
+        ht.insertCell().id("td_camera_connect_status_" + cnt).fontSize("16px").textAlign("center")
+					.width(160)
+					.innerHTML(connStr);
+        ht.insertCell().className("txtCenter")
+					.width(80)
+					.innerHTML("<input type='button' id='btnAdd" + cnt + "' value='+' class='advButton' onclick='add(" + cnt + ")'/>");
+        ht.insertCell().className("txtCenter")
+					.width(80)
+					.innerHTML("<input type='button' id='btnSet" + cnt + "' value='S' class='advButton' onclick='set(" + cnt + ")'/>");
+    
+        if (type == "Analog") {
+            setIdDisabled("btnAdd" + cnt, true);
+            setIdDisabled("btnSet" + cnt, false);
+
+            recStr = "---"
+            ipAddress = "---";
+            frameRate = "---";
+            connectStatus = "----------";
+            setIdInnerHTML("td_camera_ip_address_" + cnt, ipAddress);
+            setIdInnerHTML("td_camera_frame_rate_" + cnt, frameRate);
+            setIdInnerHTML("td_camera_rec_status_" + cnt, recStr);
+            setIdInnerHTML("td_camera_connect_status_" + cnt, connectStatus);
+        } else if (type == "IPCam") {
+            setIdDisabled("btnAdd" + cnt, false);
+            setIdDisabled("btnSet" + cnt, false);
+            ipCamCount++;
+        } else {
+            setIdDisabled("btnAdd" + cnt, true);
+            setIdDisabled("btnSet" + cnt, true);
+
+            recStr = "---"
+            ipAddress = "---";
+            frameRate = "---";
+            connectStatus = "----------";
+            setIdInnerHTML("td_camera_ip_address_" + cnt, ipAddress);
+            setIdInnerHTML("td_camera_frame_rate_" + cnt, frameRate);
+            setIdInnerHTML("td_camera_rec_status_" + cnt, recStr);
+            setIdInnerHTML("td_camera_connect_status_" + cnt, connectStatus);
+        }
+    }
+
+    setIdValue("btn_save", hl.get("SAVE"));
+    //refreshTable();
+}
+
+function setLanguage() {
+    var cnt;
+    var lenght;
+    var str;
+
+
+    setIdInnerHTML("td_Camera_List", hl.get("CAMERA_LIST"));
+   
+    setIdInnerHTML("td_list_channel", hl.get("CHANNEL"));
+    setIdInnerHTML("td_list_type", "Type");
+
+    setIdInnerHTML("td_list_ip_address", "IP Address");
+    setIdInnerHTML("td_list_frame_rate", "FPS");
+    setIdInnerHTML("td_list_rec_status", "REC"); //multi-lang
+    setIdInnerHTML("td_list_connect_status", "Connect Status");
+
+    setIdInnerHTML("td_list_add", "Add");
+    setIdInnerHTML("td_list_set", "Set");
+
+
+}
+
+function SetXML() {
+    if (ipCamCount > 8) {
+        alert("can't set IPCam count larger than 8");
+    } else {
+        syncData();
+        var hx2 = new HandleXml();
+        var newxml;
+
+        //if (parent.g_ifIE == true) {
+        //    newxml = listHx.getXml().xml.replace(/\t/g, "");
+        //} else {
+        //    newxml = (new XMLSerializer()).serializeToString(listHx.getXml()).replace(/\t/g, "");
+        //}
+        if (window.ActiveXObject) {
+            newxml = listHx.getXml().xml.replace(/\t/g, "");
+        }
+        else {
+            newxml = (new XMLSerializer()).serializeToString(listHx.getXml()).replace(/\t/g, "");
+        }
+
+
+        //alert("newxml = " + newxml);
+        ajax.postData("../cgi-bin/ENVR8304XIPCamList.xml", newxml);
+        hx2.setXml(ajax.data);
+        if (hx2.getNodeValue("result") == "1") {
+            alert(hl.get("SUCCESS"));
+        } else {
+            alert(hl.get("FAIL"));
+        }
+		//GetXML();
+		setTimeout(function(){
+        GetXML();},1000);
+        //syncDataHybridCamera();
+        //var hx3 = new HandleXml();
+        //var newxml2;
+
+        ////if (parent.g_ifIE == true) {
+        ////    newxml = listHx.getXml().xml.replace(/\t/g, "");
+        ////} else {
+        ////    newxml = (new XMLSerializer()).serializeToString(listHx.getXml()).replace(/\t/g, "");
+        ////}
+        //if (window.ActiveXObject) {
+        //    newxml2 = hybridCameraHx.getXml().xml.replace(/\t/g, "");
+        //}
+        //else {
+        //    newxml2 = (new XMLSerializer()).serializeToString(hybridCameraHx.getXml()).replace(/\t/g, "");
+        //}
+
+        ////alert("newxml2 = " + newxml2);
+        //ajax2.postData("../cgi-bin/HybridCamera.xml", newxml2);
+        //hx3.setXml(ajax2.data);
+        //if (hx3.getNodeValue("result") == "1") {
+        //    alert(hl.get("SUCCESS"));
+        //} else {
+        //    alert(hl.get("FAIL"));
+        //}
+        parent.showMsg(hx.getXml().xml, "xml");
+
+    }
+
+    
+}
+
+//function syncDataHybridCamera() {
+
+//    for (var cnt = 1; cnt <= parent.g_ipcam_num; cnt++) {
+//        var obj = document.getElementById("btnType" + cnt);
+//        var str = "Camera" + cnt;
+
+//        hybridCameraHx.setNodeValue("1", str, "modified");
+//        hybridCameraHx.setNodeValue(obj.value, str, "type");
+//    }
+//}
+
+function syncData() {
+    //var modifiedFlag = 0;
+
+    for (var cnt = 1; cnt <= parent.g_ipcam_num; cnt++) {
+        var obj = document.getElementById("btnType" + cnt);
+        var str = "camera" + cnt;
+        listHx.setNodeValue(obj.value,str, "type");
+    
+    }
+    
+}
+
+//-->
+</script>
+</head>
+<body onload="init();" >
+	<div class="ClientFrame">
+    <div id="div_list">
+    <table>
+    <tr><td id="td_Camera_List" style="font-size:26px; height:40px;color: #65A097;" align="left">Camera List</td></tr>
+    <tr>
+        <td>
+            <div>
+                <table>
+                    <tr>
+                        <td id="td_list_channel" style="font-size:20px;width:90px;color: #65A097">Channel</td>
+                        <td id="td_list_type" style="font-size:20px;width:90px;color: #65A097">Type</td>
+                        <td id="td_list_ip_address" style="font-size:20px;width:210px;color: #65A097">IP Address</td>
+                        <td id="td_list_frame_rate" style="font-size:20px;width:80px;color: #65A097">FPS</td>        
+                        <td id="td_list_rec_status" style="font-size:20px;width:50px;color: #65A097">REC</td>
+                        <td id="td_list_connect_status" style="font-size:20px;width:160px;color: #65A097">Connect</td>
+                        <td id="td_list_add" style="font-size:20px;width:80px;color: #65A097">Add</td>
+                        <td id="td_list_set" style="font-size:20px;width:80px;color: #65A097">Set</td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div style="width:1000px; height:600px; overflow:auto;">
+            <table id="tbl_list"> 
+            </table>
+            </div>
+        </td>
+    </tr>
+    </table>  
+    </div> 
+    </div>
+    
+    <div class="applyFrm" style="top: 740px; left: 920px;">
+        <input type="button" id="btn_save" class="btnStyle" value="" style="width:120px;" onclick="SetXML();"> 
+    </div>
+    <div id="mask" style="position:absolute;height:770px;width:1220px; z-index:99;  background-color:#FFFFFF; filter:alpha(opacity=50);-moz-opacity:0.5;display:none;"></div>
+	<div id="mc_apply"></div>
+</body>
+</html>

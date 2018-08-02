@@ -1,0 +1,66 @@
+<ENVR8304XIPCamList version="1.0" encoding="UTF-8">
+<Camera1>
+	<name>Camera1</name>
+	<ipAddress>192.168.xxx.xxx</ipAddress>
+	<port>8000</port>
+	<frameRate>36</frameRate>
+	<recStatus>1</recStatus>
+	<connectStatus>0</connectStatus>
+</Camera1>
+<Camera2>
+	<name>Camera2</name>
+	<ipAddress>192.168.xxx.xxx</ipAddress>
+	<port>8000</port>
+	<frameRate>36</frameRate>
+	<recStatus>1</recStatus>
+	<connectStatus>0</connectStatus>
+</Camera2>
+<Camera3>
+	<name>Camera3</name>
+	<ipAddress>192.168.xxx.xxx</ipAddress>
+	<port>8000</port>
+	<frameRate>36</frameRate>
+	<recStatus>0</recStatus>
+	<connectStatus>0</connectStatus>
+</Camera3>
+<Camera4>
+	<name>Camera4</name>
+	<ipAddress>192.168.xxx.xxx</ipAddress>
+	<port>8000</port>
+	<frameRate>36</frameRate>
+	<recStatus>0</recStatus>
+	<connectStatus>0</connectStatus>
+</Camera4>
+<Camera5>
+	<name>Camera5</name>
+	<ipAddress>192.168.xxx.xxx</ipAddress>
+	<port>8000</port>
+	<frameRate>30</frameRate>
+	<recStatus>1</recStatus>
+	<connectStatus>1</connectStatus>
+</Camera5>
+<Camera6>
+	<name>Camera6</name>
+	<ipAddress>192.168.xxx.xxx</ipAddress>
+	<port>8000</port>
+	<frameRate>36</frameRate>
+	<recStatus>1</recStatus>
+	<connectStatus>1</connectStatus>
+</Camera6>
+<Camera7>
+	<name>Camera7</name>
+	<ipAddress>192.168.xxx.xxx</ipAddress>
+	<port>2222</port>
+	<frameRate>36</frameRate>
+	<recStatus>1</recStatus>
+	<connectStatus>0</connectStatus>
+</Camera7>
+<Camera8>
+	<name>Camera8</name>
+	<ipAddress>192.168.xxx.xxx</ipAddress>
+	<port>3333</port>
+	<frameRate>36</frameRate>
+	<recStatus>1</recStatus>
+	<connectStatus>0</connectStatus>
+</Camera8>
+</ENVR8304XIPCamList>
